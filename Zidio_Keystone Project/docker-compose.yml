@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: keystone
+      POSTGRES_USER: keystone
+      POSTGRES_PASSWORD: keystone
+    ports:
+      - "5432:5432"
+    volumes:
+      - keystone_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keystone"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/keystone
+      DB_USERNAME: keystone
+      DB_PASSWORD: keystone
+      JWT_SECRET: ${JWT_SECRET:-please-change-this-to-a-long-random-secret-in-production}
+    ports:
+      - "8080:8080"
+
+volumes:
+  keystone_db_data:

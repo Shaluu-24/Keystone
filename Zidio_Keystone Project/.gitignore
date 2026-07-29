@@ -1,0 +1,18 @@
+### Backend ###
+backend/target/
+backend/.mvn/
+*.class
+*.jar
+.idea/
+*.iml
+
+### Frontend ###
+frontend/node_modules/
+frontend/dist/
+
+### Env / secrets ###
+.env
+*.env.local
+
+### OS ###
+.DS_Store
