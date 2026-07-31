@@ -27,7 +27,6 @@ public class WorkOrderService {
         this.siteRepository = siteRepository;
     }
 
-    // SLA windows by priority (brief F7: "Each work order gets an SLA due date based on priority").
     private Duration slaWindowFor(Priority priority) {
         return switch (priority) {
             case CRITICAL -> Duration.ofHours(4);
@@ -48,6 +47,7 @@ public class WorkOrderService {
         }
 
         WorkOrder wo = WorkOrder.builder()
+                .code("TEMP-" + java.util.UUID.randomUUID())
                 .title(req.title())
                 .description(req.description())
                 .priority(req.priority())
