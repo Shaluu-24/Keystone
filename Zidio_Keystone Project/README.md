@@ -65,7 +65,9 @@ mvn spring-boot:run
 Flyway runs migrations automatically on startup (`V1__init_schema.sql`, `V2__seed_reference_data.sql`).
 A `DataSeeder` component also creates one demo login per role on first boot.
 
-Backend runs at `http://localhost:8080`. Swagger UI: `http://localhost:8080/swagger-ui.html`.
+Backend runs at `http://localhost:8080`. 
+
+Swagger UI: `http://localhost:8080/swagger-ui.html`.
 
 ### 3️⃣ Frontend
 ```bash
@@ -109,6 +111,7 @@ NEW -> ASSIGNED -> IN_PROGRESS -> COMPLETED -> CLOSED
          v             v                       |
      CANCELLED     CANCELLED          (reopen: COMPLETED -> IN_PROGRESS, manager only)
 ```
+
 ❌ Illegal transitions return `409 Conflict`.
 🔒`CLOSE` is manager-only. Dispatch/assign/cancel is dispatcher or manager. Field transitions
   (start/hold/resume/complete) are the assigned technician or a manager.
@@ -140,6 +143,7 @@ keystone/
 Two ways to explore the API:
 
 Swagger UI (live, interactive) → http://localhost:8080/swagger-ui.html
+
 Postman Collection → docs/postman/KEYSTONE.postman_collection.json Import into Postman: File → Import → select this file
 
 ## 🧩 Known gaps / next steps
@@ -157,7 +161,7 @@ KEYSTONE demonstrates the implementation of a secure and scalable Java Full-Stac
 
 <div align="center">
    
-🚀 Built as part of the Java Full-Stack Engineering Internship at Zidio Development
+🚀 Built as part of the Java Full-Stack Engineering Internship at Zidio Development!
 
 </div> ```
 
