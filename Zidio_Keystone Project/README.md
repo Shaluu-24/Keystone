@@ -134,8 +134,4 @@ This is a Week 1–2 foundation, not the full 4-week scope yet. Still to build:
 - Integration tests for the lifecycle and authorization rules
 - Production deployment (currently local/dev only)
 
-## Originality note
 
-This codebase was scaffolded with AI assistance (per brief section 19, this is permitted) and is
-understood and maintained by the author. It is not copied from another trainee's individual
-submission.
