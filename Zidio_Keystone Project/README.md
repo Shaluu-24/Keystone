@@ -1,22 +1,34 @@
+<div align="center">
+   
 # Project KEYSTONE — Field Service Management Platform
 
 Java Full-Stack engineering project for Zidio Development · Client: Meridian Facilities Management
 
-## Overview
+</div>
+
+## 🎯 Overview
 
 KEYSTONE is a role-based platform for managing field-service work orders end to end — from a
 customer raising a request, through dispatch and technician fieldwork, to manager sign-off and
 close-out. Four roles (Dispatcher, Technician, Manager, Customer) each see only what their role
 needs, enforced on the server, not just hidden in the UI.
 
-## Stack
+What good looks like:
+🧑‍💼 A dispatcher raises a work order, assigns it to a technician, and tracks it on a board
+🔧 A technician opens their jobs, starts work, logs parts and time, and marks completion
+📊 A manager sees what's overdue, who's overloaded, and whether SLAs are being met
+📱 A customer raises a request and tracks its status without phoning anyone
+
+---
+
+## 🛠 Tech Stack
 
 - **Backend:** Java 21, Spring Boot 3 (Web, Security, Validation, Data JPA), JWT auth, Flyway migrations
 - **Database:** PostgreSQL
 - **Frontend:** React + TypeScript (Vite)
 - **API docs:** springdoc-openapi / Swagger UI
 
-## Architecture
+## 🏗 Architecture
 
 ```
 Client (React SPA)
@@ -25,26 +37,26 @@ Client (React SPA)
    -> Repositories (Spring Data JPA)
    -> PostgreSQL (Flyway-managed schema)
 ```
-
+    
 The work-order lifecycle (`WorkOrderLifecycleService`) is the core business rule: transitions are
 validated against a fixed state graph, role-checked, and every change writes an append-only
 `WorkOrderStatusHistory` row. See `service/WorkOrderLifecycleService.java`.
 
-## Local setup
+🚀 Local Setup
 
-### Prerequisites
+📦 Prerequisites
 - Java 21, Maven
 - Node 18+
 - PostgreSQL 16 (or use `docker-compose up db`)
 - Docker (optional, for full-stack `docker-compose up`)
 
-### 1. Database
+### 1️⃣ Database
 ```bash
 docker-compose up -d db
 # or point DB_URL / DB_USERNAME / DB_PASSWORD at your own Postgres instance
 ```
 
-### 2. Backend
+### 2️⃣ Backend
 ```bash
 cd backend
 cp .env.example .env   # then edit values
@@ -55,7 +67,7 @@ A `DataSeeder` component also creates one demo login per role on first boot.
 
 Backend runs at `http://localhost:8080`. Swagger UI: `http://localhost:8080/swagger-ui.html`.
 
-### 3. Frontend
+### 3️⃣ Frontend
 ```bash
 cd frontend
 npm install
@@ -63,12 +75,12 @@ npm run dev
 ```
 Frontend runs at `http://localhost:5173` and proxies `/api` to the backend.
 
-### 4. Full stack via Docker
+### 4️⃣ Full Stack via Docker
 ```bash
 docker-compose up --build
 ```
 
-## Environment variables
+## 🔑 Environment Variables
 
 | Variable | Purpose | Default (dev only) |
 |---|---|---|
@@ -78,9 +90,9 @@ docker-compose up --build
 | `JWT_SECRET` | JWT signing key — **set a real 256-bit+ secret in any deployed environment** | dev placeholder in `application.yml` |
 | `JWT_EXPIRATION_MS` | Token lifetime | `86400000` (24h) |
 
-Never commit real secrets — `.env` is git-ignored.
+⚠️ Never commit real secrets — `.env` is git-ignored.
 
-## Demo logins
+## 👤 Demo Logins
 
 | Role | Email | Password |
 |---|---|---|
@@ -89,7 +101,7 @@ Never commit real secrets — `.env` is git-ignored.
 | Manager | manager@keystone.demo | Password123! |
 | Customer | customer@keystone.demo | Password123! |
 
-## Work-order lifecycle
+## 🔄 Work-Order Lifecycle
 
 ```
 NEW -> ASSIGNED -> IN_PROGRESS -> COMPLETED -> CLOSED
@@ -97,12 +109,12 @@ NEW -> ASSIGNED -> IN_PROGRESS -> COMPLETED -> CLOSED
          v             v                       |
      CANCELLED     CANCELLED          (reopen: COMPLETED -> IN_PROGRESS, manager only)
 ```
-- Illegal transitions return `409 Conflict`.
-- `CLOSE` is manager-only. Dispatch/assign/cancel is dispatcher or manager. Field transitions
+❌ Illegal transitions return `409 Conflict`.
+🔒`CLOSE` is manager-only. Dispatch/assign/cancel is dispatcher or manager. Field transitions
   (start/hold/resume/complete) are the assigned technician or a manager.
-- Every transition writes a `WorkOrderStatusHistory` row (who, from, to, when, note).
+📝 Every transition writes a `WorkOrderStatusHistory` row (who, from, to, when, note).
 
-## Project structure
+## 📁 Project Structure
 
 ```
 keystone/
@@ -123,8 +135,14 @@ keystone/
     src/pages/       login + work-order board
   docker-compose.yml
 ```
+📡 API Documentation
 
-## Known gaps / next steps
+Two ways to explore the API:
+
+Swagger UI (live, interactive) → http://localhost:8080/swagger-ui.html
+Postman Collection → docs/postman/KEYSTONE.postman_collection.json Import into Postman: File → Import → select this file
+
+## 🧩 Known gaps / next steps
 
 This is a Week 1–2 foundation, not the full 4-week scope yet. Still to build:
 - SLA breach scheduled job + notifications (F7)
@@ -133,5 +151,14 @@ This is a Week 1–2 foundation, not the full 4-week scope yet. Still to build:
 - Technician mobile-responsive field view polish (F5)
 - Integration tests for the lifecycle and authorization rules
 - Production deployment (currently local/dev only)
+
+📌 Conclusion
+KEYSTONE demonstrates the implementation of a secure and scalable Java Full-Stack application using Spring Boot, React, PostgreSQL, JWT Authentication, and RESTful APIs. The project follows industry-standard architecture and software engineering practices to efficiently manage field service operations.
+
+<div align="center">
+   
+🚀 Built as part of the Java Full-Stack Engineering Internship at Zidio Development
+
+</div> ```
 
 
