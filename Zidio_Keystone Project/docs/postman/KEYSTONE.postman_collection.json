@@ -1,0 +1,369 @@
+{
+  "info": {
+    "name": "KEYSTONE API",
+    "description": "Project KEYSTONE - Field Service Management Platform API collection. Import this file into Postman: File > Import > select this file.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@keystone.demo\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticates a user and returns a JWT. Demo logins: dispatcher@keystone.demo, technician@keystone.demo, manager@keystone.demo, customer@keystone.demo (password: Password123!)"
+          },
+          "response": [
+            {
+              "name": "200 OK - Sample Response",
+              "originalRequest": {
+                "method": "POST",
+                "url": { "raw": "{{baseUrl}}/api/auth/login" }
+              },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzM4NCJ9...\",\n  \"email\": \"manager@keystone.demo\",\n  \"name\": \"Mike Manager\",\n  \"role\": \"MANAGER\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Work Orders",
+      "item": [
+        {
+          "name": "List Work Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/work-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "work-orders"]
+            },
+            "description": "Lists work orders, scoped by role. Supports pagination via ?page=0&size=20 and filtering via ?status=NEW"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Work Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/work-orders/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "work-orders", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Work Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Fix AC unit in Building A\",\n  \"description\": \"AC not cooling properly\",\n  \"priority\": \"HIGH\",\n  \"customerId\": 1,\n  \"siteId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/work-orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "work-orders"]
+            },
+            "description": "Creates a new work order. Only DISPATCHER or MANAGER roles allowed. Priority values: LOW, MEDIUM, HIGH, CRITICAL"
+          },
+          "response": [
+            {
+              "name": "200 OK - Sample Response",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/work-orders" } },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 1,\n  \"code\": \"WO-00001\",\n  \"title\": \"Fix AC unit in Building A\",\n  \"status\": \"NEW\",\n  \"priority\": \"HIGH\",\n  \"customerId\": 1,\n  \"customerName\": \"Meridian Facilities Management\",\n  \"siteId\": 1,\n  \"siteName\": \"Meridian HQ Tower\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Assign Work Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicianId\": 2,\n  \"note\": \"Assigning to on-site tech\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/work-orders/1/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "work-orders", "1", "assign"]
+            },
+            "description": "Assigns a work order to a technician. DISPATCHER or MANAGER only."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toStatus\": \"IN_PROGRESS\",\n  \"note\": \"Starting work\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/work-orders/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "work-orders", "1", "status"]
+            },
+            "description": "Transitions a work order's status. Valid values: NEW, ASSIGNED, IN_PROGRESS, ON_HOLD, COMPLETED, CLOSED, CANCELLED. Illegal transitions return 409 Conflict."
+          },
+          "response": []
+        },
+        {
+          "name": "Log Parts Used",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partId\": 1,\n  \"qtyUsed\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/work-orders/1/parts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "work-orders", "1", "parts"]
+            },
+            "description": "Logs parts used on a job; decrements stock transactionally. Assigned technician or manager only."
+          },
+          "response": []
+        },
+        {
+          "name": "Log Time",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minutes\": 90,\n  \"note\": \"Diagnosed and replaced compressor part\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/work-orders/1/time",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "work-orders", "1", "time"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "List Customers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            },
+            "description": "DISPATCHER/MANAGER only. Supports ?search= for name filtering, paginated."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"contactEmail\": \"ops@acme.example\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Sites for Customer",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/1/sites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "1", "sites"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Site for Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Warehouse\",\n  \"address\": \"12 Industrial Rd, Chennai\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/1/sites",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "1", "sites"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Parts",
+      "item": [
+        {
+          "name": "List Parts",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/parts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "parts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Part",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Capacitor 5uF\",\n  \"sku\": \"ELEC-CAP-005\",\n  \"unitCost\": 4.50,\n  \"stockQty\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/parts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "parts"]
+            },
+            "description": "MANAGER only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Part",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Capacitor 5uF\",\n  \"sku\": \"ELEC-CAP-005\",\n  \"unitCost\": 5.00,\n  \"stockQty\": 80\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/parts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "parts", "1"]
+            },
+            "description": "MANAGER only."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "summary"]
+            },
+            "description": "MANAGER/DISPATCHER only. Returns counts by status, overdue count, SLA compliance %."
+          },
+          "response": [
+            {
+              "name": "200 OK - Sample Response",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/reports/summary" } },
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"countsByStatus\": {\n    \"NEW\": 3,\n    \"ASSIGNED\": 2,\n    \"IN_PROGRESS\": 1,\n    \"ON_HOLD\": 0,\n    \"COMPLETED\": 4,\n    \"CLOSED\": 5,\n    \"CANCELLED\": 0\n  },\n  \"overdueCount\": 1,\n  \"closedCount\": 5,\n  \"slaMetCount\": 4,\n  \"slaCompliancePct\": 80.0\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
