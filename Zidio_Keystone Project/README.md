@@ -2,7 +2,7 @@
    
 # Project KEYSTONE — Field Service Management Platform
 
-Java Full-Stack engineering project for Zidio Development · Client: Meridian Facilities Management
+Java Full-Stack Engineering Project for Zidio Development · Client: Meridian Facilities Management
 
 </div>
 
@@ -13,7 +13,7 @@ customer raising a request, through dispatch and technician fieldwork, to manage
 close-out. Four roles (Dispatcher, Technician, Manager, Customer) each see only what their role
 needs, enforced on the server, not just hidden in the UI.
 
-What good looks like:
+### ✨ What Good Looks Like
 
 - 🧑‍💼 **Dispatcher:** Raises a work order, assigns it to a technician, and tracks progress.
 - 🔧 **Technician:** Views assigned jobs, starts work, logs parts and time, and marks completion.
@@ -23,10 +23,10 @@ What good looks like:
 
 ## 🛠 Tech Stack
 
-- **Backend:** Java 21, Spring Boot 3 (Web, Security, Validation, Data JPA), JWT auth, Flyway migrations
+- **Backend:** Java 21, Spring Boot 3 (Web, Security, Validation, Data JPA), JWT Authentication, Flyway
 - **Database:** PostgreSQL
 - **Frontend:** React + TypeScript (Vite)
-- **API docs:** springdoc-openapi / Swagger UI
+- **API Documentation:** Swagger UI
 
 ## 🏗 Architecture
 
@@ -157,12 +157,14 @@ This is a Week 1–2 foundation, not the full 4-week scope yet. Still to build:
 
 ## 📌 Conclusion
 
-KEYSTONE demonstrates the implementation of a secure and scalable Java Full-Stack application using Spring Boot, React, PostgreSQL, JWT Authentication, and RESTful APIs. The project follows industry-standard architecture and software engineering practices to efficiently manage field service operations.
+KEYSTONE demonstrates a secure and scalable Java Full-Stack application built using Spring Boot, React, PostgreSQL, JWT Authentication, and RESTful APIs. The project follows industry-standard architecture and software engineering practices for efficient field service management.
+
+---
 
 <div align="center">
-   
-🚀 Built as part of the Java Full-Stack Engineering Internship at Zidio Development!
 
-</div> ```
+**🚀 Built as part of the Java Full-Stack Engineering Internship at Zidio Development**
+
+</div>
 
 
