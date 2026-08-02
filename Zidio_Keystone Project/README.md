@@ -14,11 +14,11 @@ close-out. Four roles (Dispatcher, Technician, Manager, Customer) each see only 
 needs, enforced on the server, not just hidden in the UI.
 
 What good looks like:
-🧑‍💼 A dispatcher raises a work order, assigns it to a technician, and tracks it on a board
-🔧 A technician opens their jobs, starts work, logs parts and time, and marks completion
-📊 A manager sees what's overdue, who's overloaded, and whether SLAs are being met
-📱 A customer raises a request and tracks its status without phoning anyone
 
+- 🧑‍💼 **Dispatcher:** Raises a work order, assigns it to a technician, and tracks progress.
+- 🔧 **Technician:** Views assigned jobs, starts work, logs parts and time, and marks completion.
+- 📊 **Manager:** Monitors overdue work orders, technician workload, and SLA compliance.
+- 📱 **Customer:** Raises service requests and tracks their status in real time.
 ---
 
 ## 🛠 Tech Stack
@@ -112,10 +112,9 @@ NEW -> ASSIGNED -> IN_PROGRESS -> COMPLETED -> CLOSED
      CANCELLED     CANCELLED          (reopen: COMPLETED -> IN_PROGRESS, manager only)
 ```
 
-❌ Illegal transitions return `409 Conflict`.
-🔒`CLOSE` is manager-only. Dispatch/assign/cancel is dispatcher or manager. Field transitions
-  (start/hold/resume/complete) are the assigned technician or a manager.
-📝 Every transition writes a `WorkOrderStatusHistory` row (who, from, to, when, note).
+- ❌ Illegal transitions return `409 Conflict`.
+- 🔒 **CLOSE** is manager-only. Dispatch, assign, and cancel actions can be performed only by a Dispatcher or Manager. Field transitions (start, hold, resume, complete) can be performed only by the assigned Technician or a Manager.
+- 📝 Every transition creates a `WorkOrderStatusHistory` record, capturing who made the change, the previous status, the new status, timestamp, and notes.
 
 ## 📁 Project Structure
 
@@ -156,7 +155,8 @@ This is a Week 1–2 foundation, not the full 4-week scope yet. Still to build:
 - Integration tests for the lifecycle and authorization rules
 - Production deployment (currently local/dev only)
 
-📌 Conclusion
+## 📌 Conclusion
+
 KEYSTONE demonstrates the implementation of a secure and scalable Java Full-Stack application using Spring Boot, React, PostgreSQL, JWT Authentication, and RESTful APIs. The project follows industry-standard architecture and software engineering practices to efficiently manage field service operations.
 
 <div align="center">
