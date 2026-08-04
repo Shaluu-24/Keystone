@@ -1,8 +1,10 @@
 package com.zidio.keystone.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,15 +14,25 @@ public class OpenAPIConfig {
     @Bean
     public OpenAPI customOpenAPI() {
 
-        Server server = new Server();
-        server.setUrl("https://keystone-production-3393.up.railway.app");
-        server.setDescription("Railway Production Server");
-
         return new OpenAPI()
-                .addServersItem(server)
                 .info(new Info()
-                        .title("Keystone API")
-                        .version("v1")
-                        .description("Field Service Management Platform API"));
+                        .title("KEYSTONE API")
+                        .version("1.0")
+                        .description("Field Service Management Platform API"))
+                .addSecurityItem(
+                        new SecurityRequirement()
+                                .addList("Bearer Authentication")
+                )
+                .components(
+                        new Components()
+                                .addSecuritySchemes(
+                                        "Bearer Authentication",
+                                        new SecurityScheme()
+                                                .name("Authorization")
+                                                .type(SecurityScheme.Type.HTTP)
+                                                .scheme("bearer")
+                                                .bearerFormat("JWT")
+                                )
+                );
     }
 }
