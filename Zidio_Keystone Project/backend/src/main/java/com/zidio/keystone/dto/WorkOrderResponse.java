@@ -33,22 +33,23 @@ public record WorkOrderResponse(
     ) {
     }
 
-
     public static WorkOrderResponse from(WorkOrder w) {
 
-        List<HistoryEntry> history = w.getStatusHistory()
-                .stream()
-                .map(h -> new HistoryEntry(
-                        h.getFromStatus(),
-                        h.getToStatus(),
-                        h.getChangedBy() != null
-                                ? h.getChangedBy().getName()
-                                : null,
-                        h.getChangedAt(),
-                        h.getNote()
-                ))
-                .toList();
-
+        List<HistoryEntry> history =
+                w.getStatusHistory() == null
+                        ? List.of()
+                        : w.getStatusHistory()
+                            .stream()
+                            .map(h -> new HistoryEntry(
+                                    h.getFromStatus(),
+                                    h.getToStatus(),
+                                    h.getChangedBy() != null
+                                            ? h.getChangedBy().getName()
+                                            : null,
+                                    h.getChangedAt(),
+                                    h.getNote()
+                            ))
+                            .toList();
 
         return new WorkOrderResponse(
 
@@ -66,7 +67,6 @@ public record WorkOrderResponse(
 
                 w.getSlaDueAt(),
 
-
                 w.getCustomer() != null
                         ? w.getCustomer().getId()
                         : null,
@@ -74,7 +74,6 @@ public record WorkOrderResponse(
                 w.getCustomer() != null
                         ? w.getCustomer().getName()
                         : null,
-
 
                 w.getSite() != null
                         ? w.getSite().getId()
@@ -84,7 +83,6 @@ public record WorkOrderResponse(
                         ? w.getSite().getName()
                         : null,
 
-
                 w.getAssignedTo() != null
                         ? w.getAssignedTo().getId()
                         : null,
@@ -92,7 +90,6 @@ public record WorkOrderResponse(
                 w.getAssignedTo() != null
                         ? w.getAssignedTo().getName()
                         : null,
-
 
                 w.getCreatedAt(),
 
