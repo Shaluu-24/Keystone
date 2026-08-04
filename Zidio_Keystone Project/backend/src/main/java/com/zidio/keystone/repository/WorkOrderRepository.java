@@ -16,7 +16,9 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
             "customer",
             "site",
             "assignedTo",
-            "statusHistory"
+            "statusHistory",
+            "partUsages",
+            "timeLogs"
     })
     @Query("""
            select w from WorkOrder w
@@ -36,7 +38,9 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
             "customer",
             "site",
             "assignedTo",
-            "statusHistory"
+            "statusHistory",
+            "partUsages",
+            "timeLogs"
     })
     @Query("""
            select w from WorkOrder w
