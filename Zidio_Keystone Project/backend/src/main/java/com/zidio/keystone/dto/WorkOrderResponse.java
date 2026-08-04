@@ -43,13 +43,16 @@ public record WorkOrderResponse(
                             .map(h -> new HistoryEntry(
                                     h.getFromStatus(),
                                     h.getToStatus(),
+
                                     h.getChangedBy() != null
                                             ? h.getChangedBy().getName()
                                             : null,
+
                                     h.getChangedAt(),
                                     h.getNote()
                             ))
                             .toList();
+
 
         return new WorkOrderResponse(
 
@@ -67,6 +70,7 @@ public record WorkOrderResponse(
 
                 w.getSlaDueAt(),
 
+
                 w.getCustomer() != null
                         ? w.getCustomer().getId()
                         : null,
@@ -74,6 +78,7 @@ public record WorkOrderResponse(
                 w.getCustomer() != null
                         ? w.getCustomer().getName()
                         : null,
+
 
                 w.getSite() != null
                         ? w.getSite().getId()
@@ -83,6 +88,7 @@ public record WorkOrderResponse(
                         ? w.getSite().getName()
                         : null,
 
+
                 w.getAssignedTo() != null
                         ? w.getAssignedTo().getId()
                         : null,
@@ -90,6 +96,7 @@ public record WorkOrderResponse(
                 w.getAssignedTo() != null
                         ? w.getAssignedTo().getName()
                         : null,
+
 
                 w.getCreatedAt(),
 
