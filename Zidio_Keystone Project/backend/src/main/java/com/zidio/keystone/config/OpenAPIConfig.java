@@ -19,14 +19,17 @@ public class OpenAPIConfig {
                         .title("KEYSTONE API")
                         .version("1.0")
                         .description("Field Service Management Platform API"))
+
+                // Enable JWT Authorization button in Swagger UI
                 .addSecurityItem(
                         new SecurityRequirement()
-                                .addList("Bearer Authentication")
+                                .addList("bearerAuth")
                 )
+
                 .components(
                         new Components()
                                 .addSecuritySchemes(
-                                        "Bearer Authentication",
+                                        "bearerAuth",
                                         new SecurityScheme()
                                                 .name("Authorization")
                                                 .type(SecurityScheme.Type.HTTP)
