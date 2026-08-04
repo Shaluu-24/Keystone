@@ -65,9 +65,13 @@ mvn spring-boot:run
 Flyway runs migrations automatically on startup (`V1__init_schema.sql`, `V2__seed_reference_data.sql`).
 A `DataSeeder` component also creates one demo login per role on first boot.
 
-Backend runs at `http://localhost:8080`. 
+## 🌐 Live Deployment
 
-Swagger UI: `http://localhost:8080/swagger-ui.html`.
+Backend API:
+https://keystone-production-3393.up.railway.app/
+
+Swagger UI:
+https://keystone-production-3393.up.railway.app/swagger-ui/index.html
 
 ### 3️⃣ Frontend
 ```bash
