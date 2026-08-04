@@ -23,21 +23,82 @@ public record WorkOrderResponse(
         Instant updatedAt,
         List<HistoryEntry> statusHistory
 ) {
-    public record HistoryEntry(WorkOrderStatus fromStatus, WorkOrderStatus toStatus,
-                                String changedBy, Instant changedAt, String note) {}
+
+    public record HistoryEntry(
+            WorkOrderStatus fromStatus,
+            WorkOrderStatus toStatus,
+            String changedBy,
+            Instant changedAt,
+            String note
+    ) {
+    }
+
 
     public static WorkOrderResponse from(WorkOrder w) {
+
+        List<HistoryEntry> history = w.getStatusHistory()
+                .stream()
+                .map(h -> new HistoryEntry(
+                        h.getFromStatus(),
+                        h.getToStatus(),
+                        h.getChangedBy() != null
+                                ? h.getChangedBy().getName()
+                                : null,
+                        h.getChangedAt(),
+                        h.getNote()
+                ))
+                .toList();
+
+
         return new WorkOrderResponse(
-                w.getId(), w.getCode(), w.getTitle(), w.getDescription(), w.getPriority(), w.getStatus(),
+
+                w.getId(),
+
+                w.getCode(),
+
+                w.getTitle(),
+
+                w.getDescription(),
+
+                w.getPriority(),
+
+                w.getStatus(),
+
                 w.getSlaDueAt(),
-                w.getCustomer().getId(), w.getCustomer().getName(),
-                w.getSite().getId(), w.getSite().getName(),
-                w.getAssignedTo() != null ? w.getAssignedTo().getId() : null,
-                w.getAssignedTo() != null ? w.getAssignedTo().getName() : null,
-                w.getCreatedAt(), w.getUpdatedAt(),
-                w.getStatusHistory().stream().map(h -> new HistoryEntry(
-                        h.getFromStatus(), h.getToStatus(), h.getChangedBy().getName(), h.getChangedAt(), h.getNote()
-                )).toList()
+
+
+                w.getCustomer() != null
+                        ? w.getCustomer().getId()
+                        : null,
+
+                w.getCustomer() != null
+                        ? w.getCustomer().getName()
+                        : null,
+
+
+                w.getSite() != null
+                        ? w.getSite().getId()
+                        : null,
+
+                w.getSite() != null
+                        ? w.getSite().getName()
+                        : null,
+
+
+                w.getAssignedTo() != null
+                        ? w.getAssignedTo().getId()
+                        : null,
+
+                w.getAssignedTo() != null
+                        ? w.getAssignedTo().getName()
+                        : null,
+
+
+                w.getCreatedAt(),
+
+                w.getUpdatedAt(),
+
+                history
         );
     }
 }
