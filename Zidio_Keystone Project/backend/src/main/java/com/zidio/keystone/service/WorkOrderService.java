@@ -20,8 +20,8 @@ public class WorkOrderService {
     private final SiteRepository siteRepository;
 
     public WorkOrderService(WorkOrderRepository workOrderRepository,
-                             CustomerRepository customerRepository,
-                             SiteRepository siteRepository) {
+                            CustomerRepository customerRepository,
+                            SiteRepository siteRepository) {
         this.workOrderRepository = workOrderRepository;
         this.customerRepository = customerRepository;
         this.siteRepository = siteRepository;
@@ -38,27 +38,43 @@ public class WorkOrderService {
 
     @Transactional
     public WorkOrder create(WorkOrderCreateRequest req) {
+
         Customer customer = customerRepository.findById(req.customerId())
-                .orElseThrow(() -> new NotFoundException("Customer not found: " + req.customerId()));
+                .orElseThrow(() -> new NotFoundException(
+                        "Customer not found: " + req.customerId()
+                ));
+
         Site site = siteRepository.findById(req.siteId())
-                .orElseThrow(() -> new NotFoundException("Site not found: " + req.siteId()));
+                .orElseThrow(() -> new NotFoundException(
+                        "Site not found: " + req.siteId()
+                ));
+
         if (!site.getCustomer().getId().equals(customer.getId())) {
-            throw new NotFoundException("Site does not belong to the given customer");
+            throw new NotFoundException(
+                    "Site does not belong to the given customer"
+            );
         }
 
         WorkOrder wo = WorkOrder.builder()
-                .code("TEMP-" + java.util.UUID.randomUUID())
+                .code("TEMP")   // FIX: varchar(30) issue
                 .title(req.title())
                 .description(req.description())
                 .priority(req.priority())
                 .status(WorkOrderStatus.NEW)
                 .customer(customer)
                 .site(site)
-                .slaDueAt(Instant.now().plus(slaWindowFor(req.priority())))
+                .slaDueAt(
+                    Instant.now().plus(
+                        slaWindowFor(req.priority())
+                    )
+                )
                 .build();
 
         wo = workOrderRepository.save(wo);
+
+        // Final work order code
         wo.setCode("WO-" + String.format("%05d", wo.getId()));
+
         return workOrderRepository.save(wo);
     }
 }
