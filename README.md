@@ -42,7 +42,7 @@ The work-order lifecycle (`WorkOrderLifecycleService`) is the core business rule
 validated against a fixed state graph, role-checked, and every change writes an append-only
 `WorkOrderStatusHistory` row. See `service/WorkOrderLifecycleService.java`.
 
-🚀 Local Setup
+## 🚀 Local Setup
 
 📦 Prerequisites
 - Java 21, Maven
@@ -65,13 +65,13 @@ mvn spring-boot:run
 Flyway runs migrations automatically on startup (`V1__init_schema.sql`, `V2__seed_reference_data.sql`).
 A `DataSeeder` component also creates one demo login per role on first boot.
 
-## 🌐 Live Deployment
+## 💻 Live Deployment
 
-Backend API:
-https://keystone-production-3393.up.railway.app/
-
-Swagger UI:
-https://keystone-production-3393.up.railway.app/swagger-ui/index.html
+🌐 **Frontend:** https://keystone-eta-three.vercel.app
+  
+⚙️ **Backend API:** https://keystone-production-3393.up.railway.app
+  
+📖 **Swagger UI:** https://keystone-production-3393.up.railway.app/swagger-ui/index.html
 
 ### 3️⃣ Frontend
 ```bash
@@ -79,7 +79,9 @@ cd frontend
 npm install
 npm run dev
 ```
-Frontend runs at `http://localhost:5173` and proxies `/api` to the backend.
+Frontend runs locally at `http://localhost:5173` (or the port assigned by Vite, e.g. `http://localhost:5181`) and proxies `/api` requests to the backend.
+
+**Live Frontend:** https://keystone-eta-three.vercel.app
 
 ### 4️⃣ Full Stack via Docker
 ```bash
@@ -141,13 +143,13 @@ keystone/
     src/pages/       login + work-order board
   docker-compose.yml
 ```
-📡 API Documentation
+## 📡 API Documentation
 
-Two ways to explore the API:
-
-Swagger UI (live, interactive) → http://localhost:8080/swagger-ui.html
-
-Postman Collection → docs/postman/KEYSTONE.postman_collection.json Import into Postman: File → Import → select this file
+- **Live Swagger UI:** https://keystone-production-3393.up.railway.app/swagger-ui/index.html
+  
+- **Local Swagger UI:** http://localhost:8080/swagger-ui/index.html
+  
+- **Postman Collection:** `docs/postman/KEYSTONE.postman_collection.json`
 
 ## 🧩 Known gaps / next steps
 
@@ -157,7 +159,6 @@ This is a Week 1–2 foundation, not the full 4-week scope yet. Still to build:
 - Customer self-service request intake UI (F9)
 - Technician mobile-responsive field view polish (F5)
 - Integration tests for the lifecycle and authorization rules
-- Production deployment (currently local/dev only)
 
 ## 📌 Conclusion
 
