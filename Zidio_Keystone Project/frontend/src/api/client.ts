@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-export const api = axios.create({ baseURL: '/api' });
+export const api = axios.create({
+  baseURL: 'https://keystone-production-3393.up.railway.app/api'
+});
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('keystone_token');
