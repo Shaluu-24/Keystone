@@ -4,28 +4,20 @@ import com.zidio.keystone.domain.WorkOrder;
 import com.zidio.keystone.domain.WorkOrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 
-    Page<WorkOrder> findByStatus(
-            WorkOrderStatus status,
-            Pageable pageable
-    );
 
-    Page<WorkOrder> findByAssignedToId(
-            Long technicianId,
-            Pageable pageable
-    );
-
-    // Customer role users can see only their organisation work orders
-    Page<WorkOrder> findByCustomerId(
-            Long customerId,
-            Pageable pageable
-    );
-
+    @EntityGraph(attributePaths = {
+            "customer",
+            "site",
+            "assignedTo",
+            "statusHistory"
+    })
     @Query("""
            select w from WorkOrder w
            where (:status is null or w.status = :status)
@@ -38,6 +30,40 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
             @Param("technicianId") Long technicianId,
             Pageable pageable
     );
+
+
+    @EntityGraph(attributePaths = {
+            "customer",
+            "site",
+            "assignedTo",
+            "statusHistory"
+    })
+    @Query("""
+           select w from WorkOrder w
+           where w.id = :id
+           """)
+    WorkOrder findByIdWithDetails(
+            @Param("id") Long id
+    );
+
+
+    Page<WorkOrder> findByStatus(
+            WorkOrderStatus status,
+            Pageable pageable
+    );
+
+
+    Page<WorkOrder> findByAssignedToId(
+            Long technicianId,
+            Pageable pageable
+    );
+
+
+    Page<WorkOrder> findByCustomerId(
+            Long customerId,
+            Pageable pageable
+    );
+
 
     long countByStatus(
             WorkOrderStatus status
