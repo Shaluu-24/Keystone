@@ -28,11 +28,13 @@ public class WorkOrderController {
     private final PartsTimeService partsTimeService;
     private final UserRepository userRepository;
 
-    public WorkOrderController(WorkOrderRepository workOrderRepository,
-                                WorkOrderService workOrderService,
-                                WorkOrderLifecycleService lifecycleService,
-                                PartsTimeService partsTimeService,
-                                UserRepository userRepository) {
+    public WorkOrderController(
+            WorkOrderRepository workOrderRepository,
+            WorkOrderService workOrderService,
+            WorkOrderLifecycleService lifecycleService,
+            PartsTimeService partsTimeService,
+            UserRepository userRepository) {
+
         this.workOrderRepository = workOrderRepository;
         this.workOrderService = workOrderService;
         this.lifecycleService = lifecycleService;
@@ -40,96 +42,219 @@ public class WorkOrderController {
         this.userRepository = userRepository;
     }
 
-    /**
-     * List work orders, scoped by role:
-     *  - CUSTOMER: only their own organisation's work orders (server-enforced, not just hidden in UI)
-     *  - TECHNICIAN: only jobs assigned to them
-     *  - DISPATCHER / MANAGER: everything, with optional filters
-     */
+
     @GetMapping
-    public Page<WorkOrderResponse> list(@AuthenticationPrincipal UserPrincipal principal,
-                                         @RequestParam(required = false) WorkOrderStatus status,
-                                         @RequestParam(required = false) Long technicianId,
-                                         Pageable pageable) {
+    public Page<WorkOrderResponse> list(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(required = false) WorkOrderStatus status,
+            @RequestParam(required = false) Long technicianId,
+            Pageable pageable) {
+
         User actor = principal.getUser();
+
         Page<WorkOrder> page = switch (actor.getRole()) {
-            case CUSTOMER -> workOrderRepository.search(status, actor.getCustomer().getId(), null, pageable);
-            case TECHNICIAN -> workOrderRepository.search(status, null, actor.getId(), pageable);
-            case DISPATCHER, MANAGER -> workOrderRepository.search(status, null, technicianId, pageable);
+            case CUSTOMER ->
+                    workOrderRepository.search(
+                            status,
+                            actor.getCustomer().getId(),
+                            null,
+                            pageable);
+
+            case TECHNICIAN ->
+                    workOrderRepository.search(
+                            status,
+                            null,
+                            actor.getId(),
+                            pageable);
+
+            case DISPATCHER, MANAGER ->
+                    workOrderRepository.search(
+                            status,
+                            null,
+                            technicianId,
+                            pageable);
         };
+
         return page.map(WorkOrderResponse::from);
     }
 
+
     @GetMapping("/{id}")
-    public WorkOrderResponse get(@AuthenticationPrincipal UserPrincipal principal, @PathVariable Long id) {
-        WorkOrder wo = fetchAndAuthorizeRead(principal.getUser(), id);
+    public WorkOrderResponse get(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id) {
+
+        WorkOrder wo = fetchAndAuthorizeRead(
+                principal.getUser(),
+                id);
+
+        wo.getStatusHistory().size();
+
         return WorkOrderResponse.from(wo);
     }
 
+
     @PostMapping
     @PreAuthorize("hasAnyRole('DISPATCHER','MANAGER')")
-    public ResponseEntity<WorkOrderResponse> create(@Valid @RequestBody WorkOrderCreateRequest request) {
+    public ResponseEntity<WorkOrderResponse> create(
+            @Valid @RequestBody WorkOrderCreateRequest request) {
+
         WorkOrder wo = workOrderService.create(request);
-        return ResponseEntity.ok(WorkOrderResponse.from(wo));
+
+        return ResponseEntity.ok(
+                WorkOrderResponse.from(wo));
     }
+
 
     @PostMapping("/{id}/assign")
     @PreAuthorize("hasAnyRole('DISPATCHER','MANAGER')")
-    public WorkOrderResponse assign(@AuthenticationPrincipal UserPrincipal principal,
-                                     @PathVariable Long id,
-                                     @Valid @RequestBody AssignRequest request) {
+    public WorkOrderResponse assign(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @Valid @RequestBody AssignRequest request) {
+
         WorkOrder wo = findOrThrow(id);
+
         User technician = userRepository.findById(request.technicianId())
-                .orElseThrow(() -> new NotFoundException("Technician not found: " + request.technicianId()));
-        WorkOrder updated = lifecycleService.assign(wo, technician, principal.getUser(), request.note());
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                "Technician not found: "
+                                        + request.technicianId()));
+
+
+        WorkOrder updated = lifecycleService.assign(
+                wo,
+                technician,
+                principal.getUser(),
+                request.note()
+        );
+
+
+        // Fix lazy loading issue
+        updated.getStatusHistory().size();
+
+
         return WorkOrderResponse.from(updated);
     }
+
+
 
     @PostMapping("/{id}/status")
-    public WorkOrderResponse changeStatus(@AuthenticationPrincipal UserPrincipal principal,
-                                           @PathVariable Long id,
-                                           @Valid @RequestBody StatusChangeRequest request) {
+    public WorkOrderResponse changeStatus(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @Valid @RequestBody StatusChangeRequest request) {
+
+
         WorkOrder wo = findOrThrow(id);
-        WorkOrder updated = lifecycleService.transition(wo, request.toStatus(), principal.getUser(), request.note());
+
+
+        WorkOrder updated = lifecycleService.transition(
+                wo,
+                request.toStatus(),
+                principal.getUser(),
+                request.note()
+        );
+
+
+        // Fix lazy loading issue
+        updated.getStatusHistory().size();
+
+
         return WorkOrderResponse.from(updated);
     }
 
+
+
     @PostMapping("/{id}/parts")
-    public ResponseEntity<Void> logParts(@AuthenticationPrincipal UserPrincipal principal,
-                                          @PathVariable Long id,
-                                          @Valid @RequestBody PartUsageRequest request) {
+    public ResponseEntity<Void> logParts(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @Valid @RequestBody PartUsageRequest request) {
+
+
         WorkOrder wo = findOrThrow(id);
-        partsTimeService.logPartUsage(wo, request.partId(), request.qtyUsed(), principal.getUser());
+
+        partsTimeService.logPartUsage(
+                wo,
+                request.partId(),
+                request.qtyUsed(),
+                principal.getUser()
+        );
+
+
         return ResponseEntity.ok().build();
     }
+
+
 
     @PostMapping("/{id}/time")
-    public ResponseEntity<Void> logTime(@AuthenticationPrincipal UserPrincipal principal,
-                                         @PathVariable Long id,
-                                         @Valid @RequestBody TimeLogRequest request) {
+    public ResponseEntity<Void> logTime(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @Valid @RequestBody TimeLogRequest request) {
+
+
         WorkOrder wo = findOrThrow(id);
-        partsTimeService.logTime(wo, request.minutes(), request.note(), principal.getUser());
+
+
+        partsTimeService.logTime(
+                wo,
+                request.minutes(),
+                request.note(),
+                principal.getUser()
+        );
+
+
         return ResponseEntity.ok().build();
     }
 
+
+
     private WorkOrder findOrThrow(Long id) {
+
         return workOrderRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Work order not found: " + id));
+                .orElseThrow(() ->
+                        new NotFoundException(
+                                "Work order not found: " + id));
     }
 
-    // Re-checks read access server-side: a customer must never read another customer's
-    // work order, and a technician must never read a job that isn't theirs, no matter
-    // what the UI shows or hides.
-    private WorkOrder fetchAndAuthorizeRead(User actor, Long id) {
+
+
+    private WorkOrder fetchAndAuthorizeRead(
+            User actor,
+            Long id) {
+
+
         WorkOrder wo = findOrThrow(id);
+
+
         boolean allowed = switch (actor.getRole()) {
-            case MANAGER, DISPATCHER -> true;
-            case CUSTOMER -> wo.getCustomer().getId().equals(actor.getCustomer().getId());
-            case TECHNICIAN -> wo.getAssignedTo() != null && wo.getAssignedTo().getId().equals(actor.getId());
+
+            case MANAGER, DISPATCHER ->
+                    true;
+
+            case CUSTOMER ->
+                    wo.getCustomer()
+                            .getId()
+                            .equals(actor.getCustomer().getId());
+
+
+            case TECHNICIAN ->
+                    wo.getAssignedTo() != null
+                    &&
+                    wo.getAssignedTo()
+                            .getId()
+                            .equals(actor.getId());
         };
+
+
         if (!allowed) {
-            throw new ForbiddenException("You do not have access to this work order");
+            throw new ForbiddenException(
+                    "You do not have access to this work order");
         }
+
+
         return wo;
     }
 }
