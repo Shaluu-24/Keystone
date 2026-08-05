@@ -20,69 +20,120 @@ public class WorkOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     @Column(nullable = false, unique = true)
     private String code;
+
 
     @Column(nullable = false)
     private String title;
 
+
     @Column(columnDefinition = "TEXT")
     private String description;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
 
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private WorkOrderStatus status;
 
+
     @Column(name = "sla_due_at")
     private Instant slaDueAt;
+
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "site_id", nullable = false)
     private Site site;
+
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
+
+
+    // FIX: statusHistory lazy loading issue
     @Builder.Default
-    @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "workOrder",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
     @OrderBy("changedAt ASC")
     private List<WorkOrderStatusHistory> statusHistory = new ArrayList<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PartUsage> partUsages = new ArrayList<>();
+
 
     @Builder.Default
-    @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "workOrder",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<PartUsage> partUsages = new ArrayList<>();
+
+
+
+    @Builder.Default
+    @OneToMany(
+            mappedBy = "workOrder",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<TimeLog> timeLogs = new ArrayList<>();
+
+
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+
+
     @PrePersist
     void onCreate() {
+
         Instant now = Instant.now();
+
         this.createdAt = now;
         this.updatedAt = now;
+
         if (this.status == null) {
             this.status = WorkOrderStatus.NEW;
         }
     }
 
+
+
     @PreUpdate
     void onUpdate() {
+
         this.updatedAt = Instant.now();
+    }
+
+
+
+    public void addStatusHistory(WorkOrderStatusHistory history) {
+
+        statusHistory.add(history);
+        history.setWorkOrder(this);
     }
 }
