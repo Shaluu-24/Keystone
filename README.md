@@ -193,6 +193,27 @@ The implemented platform features have been tested successfully across all four 
 ✅ Dispatcher, Technician, Manager, and Customer access separated  
 ✅ Illegal work-order transitions blocked with proper API responses
 
+## 📸 Application Screenshots
+
+### 🔐 Login Page
+![Login](screenshots/login.png)
+
+### 🧑‍💼 Dispatcher
+![Dispatcher Dashboard](screenshots/dispatcher-dashboard.png)
+![Dispatcher Status](screenshots/dispatcher-status.png)
+
+### 🔧 Technician
+![Technician Dashboard](screenshots/technician-dashboard.png)
+![Technician Status](screenshots/technician-status.png)
+
+### 📊 Manager
+![Manager Dashboard](screenshots/manager-dashboard.png)
+![Manager Status](screenshots/manager-status.png)
+
+### 📱 Customer
+![Customer Dashboard](screenshots/customer-dashboard.png)
+![Customer Status](screenshots/customer-status.png)
+
 ## 📌 Conclusion
 
 KEYSTONE demonstrates a secure and scalable Java Full-Stack application built using Spring Boot, React, PostgreSQL, JWT Authentication, and RESTful APIs. The project follows industry-standard architecture and software engineering practices for efficient field service management.
