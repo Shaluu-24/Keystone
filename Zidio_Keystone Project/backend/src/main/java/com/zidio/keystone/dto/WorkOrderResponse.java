@@ -35,24 +35,9 @@ public record WorkOrderResponse(
 
     public static WorkOrderResponse from(WorkOrder w) {
 
-        List<HistoryEntry> history =
-                w.getStatusHistory() == null
-                        ? List.of()
-                        : w.getStatusHistory()
-                            .stream()
-                            .map(h -> new HistoryEntry(
-                                    h.getFromStatus(),
-                                    h.getToStatus(),
-
-                                    h.getChangedBy() != null
-                                            ? h.getChangedBy().getName()
-                                            : null,
-
-                                    h.getChangedAt(),
-                                    h.getNote()
-                            ))
-                            .toList();
-
+        // Lazy loading issue fix
+        // statusHistory avoid pannrom
+        List<HistoryEntry> history = List.of();
 
         return new WorkOrderResponse(
 
