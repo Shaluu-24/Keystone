@@ -11,14 +11,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 
-
     @EntityGraph(attributePaths = {
             "customer",
             "site",
-            "assignedTo",
-            "statusHistory",
-            "partUsages",
-            "timeLogs"
+            "assignedTo"
     })
     @Query("""
            select w from WorkOrder w
@@ -37,10 +33,7 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
     @EntityGraph(attributePaths = {
             "customer",
             "site",
-            "assignedTo",
-            "statusHistory",
-            "partUsages",
-            "timeLogs"
+            "assignedTo"
     })
     @Query("""
            select w from WorkOrder w
