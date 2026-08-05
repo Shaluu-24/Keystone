@@ -193,26 +193,44 @@ The implemented platform features have been tested successfully across all four 
 ✅ Dispatcher, Technician, Manager, and Customer access separated  
 ✅ Illegal work-order transitions blocked with proper API responses
 
-## 📸 Application Screenshots
+## 📸 Application Walkthrough
 
-### 🔐 Login Page
+### 🔐 Authentication
+The application starts with a secure JWT-based login system.
+
 ![Login Page](screenshots/login.png)
 
-### 🧑‍💼 Dispatcher
+
+### 🧑‍💼 Dispatcher Workflow
+Dispatcher can create work orders, assign technicians, and monitor progress.
+
 ![Dispatcher Dashboard](screenshots/dispatcher-dashboard.png)
-![Dispatcher Status](screenshots/dispatcher%20status.png)
 
-### 🔧 Technician
+![Dispatcher Work Order Status](screenshots/dispatcher%20status.png)
+
+
+### 🔧 Technician Workflow
+Technicians can view assigned jobs and update work order lifecycle status.
+
 ![Technician Dashboard](screenshots/technician%20dashboard.png)
-![Technician Status](screenshots/technician%20status.png)
 
-### 📊 Manager
+![Technician Status Update](screenshots/technician%20status.png)
+
+
+### 📊 Manager Workflow
+Managers can monitor all work orders and manage lifecycle operations.
+
 ![Manager Dashboard](screenshots/manager%20dashboard.png)
-![Manager Status](screenshots/manager%20status.png)
 
-### 📱 Customer
+![Manager Status Monitoring](screenshots/manager%20status.png)
+
+
+### 📱 Customer Workflow
+Customers can view service requests and track their request progress.
+
 ![Customer Dashboard](screenshots/customer%20dashboard.png)
-![Customer Status](screenshots/customer%20status.png)
+
+![Customer Request Status](screenshots/customer%20status.png)
 
 ## 📌 Conclusion
 
