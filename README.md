@@ -200,19 +200,19 @@ The implemented platform features have been tested successfully across all four 
 
 ### 🧑‍💼 Dispatcher
 ![Dispatcher Dashboard](screenshots/dispatcher-dashboard.png)
-![Dispatcher Status](screenshots/dispatcher-status.png)
+![Dispatcher Status](screenshots/dispatcher%20status.png)
 
 ### 🔧 Technician
-![Technician Dashboard](screenshots/technician-dashboard.png)
-![Technician Status](screenshots/technician-status.png)
+![Technician Dashboard](screenshots/technician%20dashboard.png)
+![Technician Status](screenshots/technician%20status.png)
 
 ### 📊 Manager
-![Manager Dashboard](screenshots/manager-dashboard.png)
-![Manager Status](screenshots/manager-status.png)
+![Manager Dashboard](screenshots/manager%20dashboard.png)
+![Manager Status](screenshots/manager%20status.png)
 
 ### 📱 Customer
-![Customer Dashboard](screenshots/customer-dashboard.png)
-![Customer Status](screenshots/customer-status.png)
+![Customer Dashboard](screenshots/customer%20dashboard.png)
+![Customer Status](screenshots/customer%20status.png)
 
 ## 📌 Conclusion
 
