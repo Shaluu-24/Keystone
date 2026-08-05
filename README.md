@@ -198,17 +198,21 @@ The implemented platform features have been tested successfully across all four 
 ### 🔐 Login Page
 ![Login Page](screenshots/login.png)
 
-### 🧑‍💼 Dispatcher Dashboard
+### 🧑‍💼 Dispatcher
 ![Dispatcher Dashboard](screenshots/dispatcher-dashboard.png)
+![Dispatcher Status](screenshots/dispatcher%20status.png)
 
-### 🔧 Technician Dashboard
+### 🔧 Technician
 ![Technician Dashboard](screenshots/technician%20dashboard.png)
+![Technician Status](screenshots/technician%20status.png)
 
-### 📊 Manager Dashboard
+### 📊 Manager
 ![Manager Dashboard](screenshots/manager%20dashboard.png)
+![Manager Status](screenshots/manager%20status.png)
 
-### 📱 Customer Dashboard
+### 📱 Customer
 ![Customer Dashboard](screenshots/customer%20dashboard.png)
+![Customer Status](screenshots/customer%20status.png)
 
 ## 📌 Conclusion
 
