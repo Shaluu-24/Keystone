@@ -160,6 +160,39 @@ This is a Week 1–2 foundation, not the full 4-week scope yet. Still to build:
 - Technician mobile-responsive field view polish (F5)
 - Integration tests for the lifecycle and authorization rules
 
+## ✅ KEYSTONE Feature Verification
+
+The implemented platform features have been tested successfully across all four roles.
+
+### 🧑‍💼 Dispatcher (Dana Dispatcher)
+✅ Login authentication working  
+✅ Create new work orders  
+✅ Assign technicians to work orders  
+✅ Track work order status changes  
+
+### 🔧 Technician (Tara Technician)
+✅ View assigned work orders  
+✅ Access technician work board  
+✅ Update work order lifecycle status  
+✅ Perform field-work actions based on permissions  
+
+### 📊 Manager (Mike Manager)
+✅ View all work orders  
+✅ Monitor assigned work orders  
+✅ Access manager-level work order visibility  
+✅ Manage lifecycle operations based on role permissions  
+
+### 📱 Customer (Cara Customer)
+✅ Login authentication working  
+✅ View submitted service requests  
+✅ Track request status updates  
+
+### 🔐 Security Validation
+✅ JWT-based authentication implemented  
+✅ Role-based authorization enforced on backend  
+✅ Dispatcher, Technician, Manager, and Customer access separated  
+✅ Illegal work-order transitions blocked with proper API responses
+
 ## 📌 Conclusion
 
 KEYSTONE demonstrates a secure and scalable Java Full-Stack application built using Spring Boot, React, PostgreSQL, JWT Authentication, and RESTful APIs. The project follows industry-standard architecture and software engineering practices for efficient field service management.
@@ -168,6 +201,6 @@ KEYSTONE demonstrates a secure and scalable Java Full-Stack application built us
 
 <div align="center">
 
-**🚀 Built as part of the Java Full-Stack Engineering Internship at Zidio Development**
+**🚀 Built as part of the Java Full-Stack Engineering Internship at Zidio Development!**
 
 </div>
