@@ -33,8 +33,8 @@ public class WorkOrderController {
             WorkOrderService workOrderService,
             WorkOrderLifecycleService lifecycleService,
             PartsTimeService partsTimeService,
-            UserRepository userRepository) {
-
+            UserRepository userRepository
+    ) {
         this.workOrderRepository = workOrderRepository;
         this.workOrderService = workOrderService;
         this.lifecycleService = lifecycleService;
@@ -48,31 +48,36 @@ public class WorkOrderController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(required = false) WorkOrderStatus status,
             @RequestParam(required = false) Long technicianId,
-            Pageable pageable) {
+            Pageable pageable
+    ) {
 
         User actor = principal.getUser();
 
         Page<WorkOrder> page = switch (actor.getRole()) {
+
             case CUSTOMER ->
                     workOrderRepository.search(
                             status,
                             actor.getCustomer().getId(),
                             null,
-                            pageable);
+                            pageable
+                    );
 
             case TECHNICIAN ->
                     workOrderRepository.search(
                             status,
                             null,
                             actor.getId(),
-                            pageable);
+                            pageable
+                    );
 
             case DISPATCHER, MANAGER ->
                     workOrderRepository.search(
                             status,
                             null,
                             technicianId,
-                            pageable);
+                            pageable
+                    );
         };
 
         return page.map(WorkOrderResponse::from);
@@ -82,11 +87,13 @@ public class WorkOrderController {
     @GetMapping("/{id}")
     public WorkOrderResponse get(
             @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable Long id) {
+            @PathVariable Long id
+    ) {
 
         WorkOrder wo = fetchAndAuthorizeRead(
                 principal.getUser(),
-                id);
+                id
+        );
 
         wo.getStatusHistory().size();
 
@@ -97,12 +104,14 @@ public class WorkOrderController {
     @PostMapping
     @PreAuthorize("hasAnyRole('DISPATCHER','MANAGER')")
     public ResponseEntity<WorkOrderResponse> create(
-            @Valid @RequestBody WorkOrderCreateRequest request) {
+            @Valid @RequestBody WorkOrderCreateRequest request
+    ) {
 
         WorkOrder wo = workOrderService.create(request);
 
         return ResponseEntity.ok(
-                WorkOrderResponse.from(wo));
+                WorkOrderResponse.from(wo)
+        );
     }
 
 
@@ -111,15 +120,19 @@ public class WorkOrderController {
     public WorkOrderResponse assign(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long id,
-            @Valid @RequestBody AssignRequest request) {
+            @Valid @RequestBody AssignRequest request
+    ) {
 
         WorkOrder wo = findOrThrow(id);
 
-        User technician = userRepository.findById(request.technicianId())
-                .orElseThrow(() ->
-                        new NotFoundException(
-                                "Technician not found: "
-                                        + request.technicianId()));
+
+        User technician = userRepository.findById(
+                request.technicianId()
+        ).orElseThrow(() ->
+                new NotFoundException(
+                        "Technician not found: " + request.technicianId()
+                )
+        );
 
 
         WorkOrder updated = lifecycleService.assign(
@@ -130,7 +143,7 @@ public class WorkOrderController {
         );
 
 
-        // Fix lazy loading issue
+        // Fix Hibernate LazyInitializationException
         updated.getStatusHistory().size();
 
 
@@ -143,21 +156,21 @@ public class WorkOrderController {
     public WorkOrderResponse changeStatus(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long id,
-            @Valid @RequestBody StatusChangeRequest request) {
-
+            @Valid @RequestBody StatusChangeRequest request
+    ) {
 
         WorkOrder wo = findOrThrow(id);
 
 
-        WorkOrder updated = lifecycleService.transition(
-                wo,
-                request.toStatus(),
-                principal.getUser(),
-                request.note()
-        );
+        WorkOrder updated =
+                lifecycleService.transition(
+                        wo,
+                        request.toStatus(),
+                        principal.getUser(),
+                        request.note()
+                );
 
 
-        // Fix lazy loading issue
         updated.getStatusHistory().size();
 
 
@@ -170,8 +183,8 @@ public class WorkOrderController {
     public ResponseEntity<Void> logParts(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long id,
-            @Valid @RequestBody PartUsageRequest request) {
-
+            @Valid @RequestBody PartUsageRequest request
+    ) {
 
         WorkOrder wo = findOrThrow(id);
 
@@ -182,7 +195,6 @@ public class WorkOrderController {
                 principal.getUser()
         );
 
-
         return ResponseEntity.ok().build();
     }
 
@@ -192,11 +204,10 @@ public class WorkOrderController {
     public ResponseEntity<Void> logTime(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long id,
-            @Valid @RequestBody TimeLogRequest request) {
-
+            @Valid @RequestBody TimeLogRequest request
+    ) {
 
         WorkOrder wo = findOrThrow(id);
-
 
         partsTimeService.logTime(
                 wo,
@@ -204,7 +215,6 @@ public class WorkOrderController {
                 request.note(),
                 principal.getUser()
         );
-
 
         return ResponseEntity.ok().build();
     }
@@ -216,23 +226,26 @@ public class WorkOrderController {
         return workOrderRepository.findById(id)
                 .orElseThrow(() ->
                         new NotFoundException(
-                                "Work order not found: " + id));
+                                "Work order not found: " + id
+                        )
+                );
     }
 
 
 
     private WorkOrder fetchAndAuthorizeRead(
             User actor,
-            Long id) {
-
+            Long id
+    ) {
 
         WorkOrder wo = findOrThrow(id);
 
 
-        boolean allowed = switch (actor.getRole()) {
+        boolean allowed = switch(actor.getRole()) {
 
             case MANAGER, DISPATCHER ->
                     true;
+
 
             case CUSTOMER ->
                     wo.getCustomer()
@@ -249,9 +262,10 @@ public class WorkOrderController {
         };
 
 
-        if (!allowed) {
+        if(!allowed){
             throw new ForbiddenException(
-                    "You do not have access to this work order");
+                    "You do not have access to this work order"
+            );
         }
 
 
