@@ -27,7 +27,6 @@ status:"ASSIGNED"
 ];
 
 
-
 return(
 
 <div
@@ -52,7 +51,7 @@ fontFamily:"Arial, sans-serif"
 
 {/* SIDEBAR */}
 
-<div
+<aside
 
 style={{
 
@@ -85,11 +84,13 @@ KEYSTONE
 
 
 
-<p
+<h3
 
 style={{
 
-color:"#64748b"
+color:"#64748b",
+
+marginBottom:"30px"
 
 }}
 
@@ -97,9 +98,7 @@ color:"#64748b"
 
 Technician Panel
 
-</p>
-
-
+</h3>
 
 
 
@@ -139,17 +138,44 @@ onClick={()=>navigate("/settings")}
 />
 
 
-<MenuItem
 
-text="⇥ Logout"
+<button
 
 onClick={()=>navigate("/login")}
 
-/>
+style={{
+
+width:"100%",
+
+marginTop:"25px",
+
+padding:"12px",
+
+background:"#dc2626",
+
+color:"white",
+
+border:"none",
+
+borderRadius:"10px",
+
+cursor:"pointer",
+
+fontWeight:"bold",
+
+fontSize:"15px"
+
+}}
+
+>
+
+⇥ Logout
+
+</button>
 
 
-</div>
 
+</aside>
 
 
 
@@ -158,8 +184,7 @@ onClick={()=>navigate("/login")}
 
 {/* MAIN CONTENT */}
 
-
-<div
+<main
 
 style={{
 
@@ -172,45 +197,51 @@ padding:"40px"
 >
 
 
-
-
-
 <h1
+
 style={{
-  color:"#2563eb"
+
+color:"#2563eb"
+
 }}
+
 >
+
 Technician Dashboard
+
 </h1>
 
+
+
 <p
+
 style={{
-  fontSize:"18px",
-  color: darkMode ? "#cbd5e1" : "#475569",
-  marginTop:"15px",
-  marginBottom:"8px"
+
+color:"#64748b"
+
 }}
+
 >
+
 Welcome Technician
+
 </p>
+
+
 
 <p
+
 style={{
-  color: darkMode ? "#94a3b8" : "#64748b",
-  fontSize:"16px",
-  marginTop:0,
-  marginBottom:"25px"
+
+color:"#64748b"
+
 }}
+
 >
+
 View assigned jobs, update progress, and complete service tasks.
+
 </p>
-
-
-
-
-
-
-
 
 
 
@@ -277,8 +308,6 @@ darkMode={darkMode}
 
 
 
-
-
 {/* WORK ORDERS */}
 
 
@@ -317,6 +346,7 @@ My Work Orders
 
 
 
+
 {
 
 jobs.map((job)=>(
@@ -352,21 +382,21 @@ borderLeft:"5px solid #2563eb"
 
 <p>
 
-<b>Service:</b> {job.service}
+Service: {job.service}
 
 </p>
 
 
 <p>
 
-<b>Location:</b> {job.location}
+Location: {job.location}
 
 </p>
 
 
 <p>
 
-<b>Status:</b>
+Status:
 
 <span
 
@@ -431,15 +461,17 @@ View Details
 
 
 
-</div>
+</main>
 
 
 
 </div>
+
 
 );
 
 }
+
 
 
 
@@ -451,7 +483,14 @@ text,
 
 onClick
 
-}:any){
+}:{
+
+text:string;
+
+onClick:()=>void;
+
+}){
+
 
 return(
 
@@ -537,6 +576,7 @@ color:"#2563eb"
 {value}
 
 </h1>
+
 
 
 </div>
