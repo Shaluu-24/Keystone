@@ -8,7 +8,6 @@ const { login } = useAuth();
 
 const navigate = useNavigate();
 
-
 const [email,setEmail] = useState("");
 const [password,setPassword] = useState("");
 
@@ -51,9 +50,7 @@ setLoading(false);
 
 
 
-
 return(
-
 
 <div
 
@@ -70,7 +67,6 @@ background:"#020617"
 }}
 
 >
-
 
 
 {/* LEFT SIDE */}
@@ -152,10 +148,10 @@ maxWidth:"500px"
 Smart operations for modern service teams.
 
 Manage work orders, technicians, customers,
+
 and service requests from one unified platform.
 
 </p>
-
 
 
 
@@ -173,29 +169,19 @@ lineHeight:"2"
 
 >
 
-✓ Work Order Management
+<p>✓ Work Order Management</p>
 
-<br/>
+<p>✓ Technician Scheduling</p>
 
-✓ Technician Scheduling
+<p>✓ Customer Service Tracking</p>
 
-<br/>
-
-✓ Customer Service Tracking
-
-<br/>
-
-✓ Performance Analytics
+<p>✓ Performance Analytics</p>
 
 
 </div>
 
 
-
 </div>
-
-
-
 
 
 
@@ -279,12 +265,14 @@ Access your workspace
 
 
 
-
-
 <form onSubmit={handleSubmit}>
 
 
-<label>Email</label>
+<label style={{color:"white"}}>
+
+Email
+
+</label>
 
 
 <input
@@ -305,7 +293,11 @@ style={inputStyle}
 
 
 
-<label>Password</label>
+<label style={{color:"white"}}>
+
+Password
+
+</label>
 
 
 <input
@@ -325,8 +317,8 @@ style={inputStyle}
 
 
 
-
 {
+
 error &&
 
 <p
@@ -352,6 +344,8 @@ textAlign:"center"
 
 
 <button
+
+type="submit"
 
 disabled={loading}
 
@@ -379,6 +373,7 @@ marginTop:"15px"
 
 >
 
+
 {
 
 loading ? "SIGNING IN..." : "SIGN IN"
@@ -394,93 +389,6 @@ loading ? "SIGNING IN..." : "SIGN IN"
 
 
 
-
-
-
-
-
-<div
-
-style={{
-
-marginTop:"25px",
-
-padding:"18px",
-
-background:"#020617",
-
-borderRadius:"12px",
-
-color:"#cbd5e1",
-
-fontSize:"14px"
-
-}}
-
->
-
-
-<b style={{color:"#3b82f6"}}>
-
-DEMO ACCOUNTS
-
-</b>
-
-
-<br/><br/>
-
-
-Dispatcher
-
-<br/>
-
-dispatcher@keystone.demo
-
-
-<br/><br/>
-
-
-Technician
-
-<br/>
-
-technician@keystone.demo
-
-
-<br/><br/>
-
-
-Manager
-
-<br/>
-
-manager@keystone.demo
-
-
-<br/><br/>
-
-
-Customer
-
-<br/>
-
-customer@keystone.demo
-
-
-<br/><br/>
-
-
-Password:
-
-<br/>
-
-Password123!
-
-
-</div>
-
-
-
 </div>
 
 
@@ -488,10 +396,8 @@ Password123!
 
 
 </div>
-
 
 );
-
 
 }
 
