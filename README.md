@@ -164,25 +164,25 @@ This is a Week 1–2 foundation, not the full 4-week scope yet. Still to build:
 
 The implemented platform features have been tested successfully across all four roles.
 
-### 🧑‍💼 Dispatcher (Dana Dispatcher)
+### 🧑‍💼 Dispatcher 
 ✅ Login authentication working  
 ✅ Create new work orders  
 ✅ Assign technicians to work orders  
 ✅ Track work order status changes  
 
-### 🔧 Technician (Tara Technician)
+### 🔧 Technician 
 ✅ View assigned work orders  
 ✅ Access technician work board  
 ✅ Update work order lifecycle status  
 ✅ Perform field-work actions based on permissions  
 
-### 📊 Manager (Mike Manager)
+### 📊 Manager 
 ✅ View all work orders  
 ✅ Monitor assigned work orders  
 ✅ Access manager-level work order visibility  
 ✅ Manage lifecycle operations based on role permissions  
 
-### 📱 Customer (Cara Customer)
+### 📱 Customer 
 ✅ Login authentication working  
 ✅ View submitted service requests  
 ✅ Track request status updates  
@@ -193,44 +193,6 @@ The implemented platform features have been tested successfully across all four 
 ✅ Dispatcher, Technician, Manager, and Customer access separated  
 ✅ Illegal work-order transitions blocked with proper API responses
 
-## 📸 Application Walkthrough
-
-### 🔐 Authentication
-The application starts with a secure JWT-based login system.
-
-![Login Page](screenshots/login.png)
-
-
-### 🧑‍💼 Dispatcher Workflow
-Dispatcher can create work orders, assign technicians, and monitor progress.
-
-![Dispatcher Dashboard](screenshots/dispatcher-dashboard.png)
-
-![Dispatcher Work Order Status](screenshots/dispatcher%20status.png)
-
-
-### 🔧 Technician Workflow
-Technicians can view assigned jobs and update work order lifecycle status.
-
-![Technician Dashboard](screenshots/technician%20dashboard.png)
-
-![Technician Status Update](screenshots/technician%20status.png)
-
-
-### 📊 Manager Workflow
-Managers can monitor all work orders and manage lifecycle operations.
-
-![Manager Dashboard](screenshots/manager%20dashboard.png)
-
-![Manager Status Monitoring](screenshots/manager%20status.png)
-
-
-### 📱 Customer Workflow
-Customers can view service requests and track their request progress.
-
-![Customer Dashboard](screenshots/customer%20dashboard.png)
-
-![Customer Request Status](screenshots/customer%20status.png)
 
 ## 📌 Conclusion
 
