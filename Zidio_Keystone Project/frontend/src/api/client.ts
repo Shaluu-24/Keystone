@@ -1,14 +1,16 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'https://keystone-production-3393.up.railway.app/api'
+  baseURL: 'https://keystone-production-3393.up.railway.app/api',
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('keystone_token');
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
@@ -20,11 +22,16 @@ api.interceptors.response.use(
       localStorage.removeItem('keystone_user');
       window.location.href = '/login';
     }
+
     return Promise.reject(err);
   }
 );
 
-export type Role = 'DISPATCHER' | 'TECHNICIAN' | 'MANAGER' | 'CUSTOMER';
+export type Role =
+  | 'DISPATCHER'
+  | 'TECHNICIAN'
+  | 'MANAGER'
+  | 'CUSTOMER';
 
 export interface AuthUser {
   email: string;
@@ -37,15 +44,29 @@ export interface WorkOrder {
   code: string;
   title: string;
   description?: string;
+
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  status: 'NEW' | 'ASSIGNED' | 'IN_PROGRESS' | 'ON_HOLD' | 'COMPLETED' | 'CLOSED' | 'CANCELLED';
+
+  status:
+    | 'NEW'
+    | 'ASSIGNED'
+    | 'IN_PROGRESS'
+    | 'ON_HOLD'
+    | 'COMPLETED'
+    | 'CLOSED'
+    | 'CANCELLED';
+
   slaDueAt?: string;
+
   customerId: number;
   customerName: string;
+
   siteId: number;
   siteName: string;
+
   assignedToId?: number;
   assignedToName?: string;
+
   createdAt: string;
   updatedAt: string;
 }
