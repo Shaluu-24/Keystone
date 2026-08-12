@@ -1,4 +1,3 @@
-```java
 package com.zidio.keystone.config;
 
 import com.zidio.keystone.security.AppUserDetailsService;
@@ -78,14 +77,14 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                // Home page
+                // Home
                 .requestMatchers("/").permitAll()
 
-                // Authentication - PUBLIC
+                // Authentication APIs
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/register").permitAll()
 
-                // Public customer request intake
+                // Public customer request
                 .requestMatchers("/api/requests/public").permitAll()
 
                 // Swagger / OpenAPI
@@ -98,7 +97,7 @@ public class SecurityConfig {
                 // Health check
                 .requestMatchers("/actuator/health").permitAll()
 
-                // All other APIs require JWT
+                // Everything else requires authentication
                 .anyRequest().authenticated()
             )
 
@@ -150,4 +149,3 @@ public class SecurityConfig {
         return source;
     }
 }
-```
