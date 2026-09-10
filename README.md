@@ -65,6 +65,14 @@ mvn spring-boot:run
 Flyway runs migrations automatically on startup (`V1__init_schema.sql`, `V2__seed_reference_data.sql`).
 A `DataSeeder` component also creates one demo login per role on first boot.
 
+## 🎥 Project Demo & Documentation
+
+### 🎬 Demo Video
+[Watch KEYSTONE Demo Video](https://drive.google.com/file/d/1Yv-AALNOavfe3GF6eQHEhA996uzncLL8/view?usp=sharing)
+
+### 📄 Project Report
+[View KEYSTONE Project Report](https://drive.google.com/file/d/1yrpmQX-h3u0vmjY4F4Rk2fc2_H5PSPsw/view?usp=sharing)
+
 ## 💻 Live Deployment
 
 🌐 **Frontend:** https://keystone-eta-three.vercel.app
