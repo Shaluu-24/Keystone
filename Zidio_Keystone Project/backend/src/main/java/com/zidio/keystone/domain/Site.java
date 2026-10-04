@@ -30,6 +30,12 @@ public class Site {
     @Column(nullable = false)
     private String address;
 
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -38,3 +44,4 @@ public class Site {
         this.createdAt = Instant.now();
     }
 }
+

@@ -10,7 +10,9 @@ import com.zidio.keystone.security.UserPrincipal;
 import com.zidio.keystone.service.PartsTimeService;
 import com.zidio.keystone.service.WorkOrderLifecycleService;
 import com.zidio.keystone.service.WorkOrderService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +43,6 @@ public class WorkOrderController {
         this.partsTimeService = partsTimeService;
         this.userRepository = userRepository;
     }
-
 
     @GetMapping
     public Page<WorkOrderResponse> list(
@@ -83,7 +84,6 @@ public class WorkOrderController {
         return page.map(WorkOrderResponse::from);
     }
 
-
     @GetMapping("/{id}")
     public WorkOrderResponse get(
             @AuthenticationPrincipal UserPrincipal principal,
@@ -100,7 +100,6 @@ public class WorkOrderController {
         return WorkOrderResponse.from(wo);
     }
 
-
     @PostMapping
     @PreAuthorize("hasAnyRole('DISPATCHER','MANAGER')")
     public ResponseEntity<WorkOrderResponse> create(
@@ -114,7 +113,6 @@ public class WorkOrderController {
         );
     }
 
-
     @PostMapping("/{id}/assign")
     @PreAuthorize("hasAnyRole('DISPATCHER','MANAGER')")
     public WorkOrderResponse assign(
@@ -125,7 +123,6 @@ public class WorkOrderController {
 
         WorkOrder wo = findOrThrow(id);
 
-
         User technician = userRepository.findById(
                 request.technicianId()
         ).orElseThrow(() ->
@@ -134,7 +131,6 @@ public class WorkOrderController {
                 )
         );
 
-
         WorkOrder updated = lifecycleService.assign(
                 wo,
                 technician,
@@ -142,15 +138,10 @@ public class WorkOrderController {
                 request.note()
         );
 
-
-        // Fix Hibernate LazyInitializationException
         updated.getStatusHistory().size();
-
 
         return WorkOrderResponse.from(updated);
     }
-
-
 
     @PostMapping("/{id}/status")
     public WorkOrderResponse changeStatus(
@@ -161,7 +152,6 @@ public class WorkOrderController {
 
         WorkOrder wo = findOrThrow(id);
 
-
         WorkOrder updated =
                 lifecycleService.transition(
                         wo,
@@ -170,14 +160,10 @@ public class WorkOrderController {
                         request.note()
                 );
 
-
         updated.getStatusHistory().size();
-
 
         return WorkOrderResponse.from(updated);
     }
-
-
 
     @PostMapping("/{id}/parts")
     public ResponseEntity<Void> logParts(
@@ -198,8 +184,6 @@ public class WorkOrderController {
         return ResponseEntity.ok().build();
     }
 
-
-
     @PostMapping("/{id}/time")
     public ResponseEntity<Void> logTime(
             @AuthenticationPrincipal UserPrincipal principal,
@@ -219,8 +203,6 @@ public class WorkOrderController {
         return ResponseEntity.ok().build();
     }
 
-
-
     private WorkOrder findOrThrow(Long id) {
 
         return workOrderRepository.findById(id)
@@ -231,27 +213,38 @@ public class WorkOrderController {
                 );
     }
 
-
-
     private WorkOrder fetchAndAuthorizeRead(
             User actor,
             Long id
     ) {
 
-        WorkOrder wo = findOrThrow(id);
+        /*
+         * Fetch customer, site, assigned technician and related
+         * work-order details before the Hibernate session closes.
+         * This prevents LazyInitializationException on the
+         * Work Order Details page.
+         */
+        WorkOrder wo = workOrderRepository.findByIdWithDetails(id);
 
+        if (wo == null) {
+            throw new NotFoundException(
+                    "Work order not found: " + id
+            );
+        }
 
-        boolean allowed = switch(actor.getRole()) {
+        boolean allowed = switch (actor.getRole()) {
 
             case MANAGER, DISPATCHER ->
                     true;
 
-
             case CUSTOMER ->
+                    wo.getCustomer() != null
+                    &&
+                    actor.getCustomer() != null
+                    &&
                     wo.getCustomer()
                             .getId()
                             .equals(actor.getCustomer().getId());
-
 
             case TECHNICIAN ->
                     wo.getAssignedTo() != null
@@ -261,13 +254,11 @@ public class WorkOrderController {
                             .equals(actor.getId());
         };
 
-
-        if(!allowed){
+        if (!allowed) {
             throw new ForbiddenException(
                     "You do not have access to this work order"
             );
         }
-
 
         return wo;
     }

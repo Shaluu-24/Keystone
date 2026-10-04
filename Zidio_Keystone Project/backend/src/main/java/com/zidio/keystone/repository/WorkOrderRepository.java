@@ -33,7 +33,8 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
     @EntityGraph(attributePaths = {
             "customer",
             "site",
-            "assignedTo"
+            "assignedTo",
+            "statusHistory"
     })
     @Query("""
            select w from WorkOrder w
