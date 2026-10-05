@@ -1,3 +1,4 @@
+
 package com.zidio.keystone.service;
 
 import com.zidio.keystone.domain.*;
@@ -6,6 +7,7 @@ import com.zidio.keystone.exception.ApiExceptions.NotFoundException;
 import com.zidio.keystone.repository.CustomerRepository;
 import com.zidio.keystone.repository.SiteRepository;
 import com.zidio.keystone.repository.WorkOrderRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,15 +21,18 @@ public class WorkOrderService {
     private final CustomerRepository customerRepository;
     private final SiteRepository siteRepository;
 
-    public WorkOrderService(WorkOrderRepository workOrderRepository,
-                            CustomerRepository customerRepository,
-                            SiteRepository siteRepository) {
+    public WorkOrderService(
+            WorkOrderRepository workOrderRepository,
+            CustomerRepository customerRepository,
+            SiteRepository siteRepository) {
+
         this.workOrderRepository = workOrderRepository;
         this.customerRepository = customerRepository;
         this.siteRepository = siteRepository;
     }
 
     private Duration slaWindowFor(Priority priority) {
+
         return switch (priority) {
             case CRITICAL -> Duration.ofHours(4);
             case HIGH -> Duration.ofHours(24);
@@ -56,23 +61,23 @@ public class WorkOrderService {
         }
 
         WorkOrder wo = WorkOrder.builder()
-                .code("TEMP")   // FIX: varchar(30) issue
+                .code("TEMP")
                 .title(req.title())
                 .description(req.description())
                 .priority(req.priority())
                 .status(WorkOrderStatus.NEW)
+                .serviceRequestId(req.serviceRequestId())
                 .customer(customer)
                 .site(site)
                 .slaDueAt(
-                    Instant.now().plus(
-                        slaWindowFor(req.priority())
-                    )
+                        Instant.now().plus(
+                                slaWindowFor(req.priority())
+                        )
                 )
                 .build();
 
         wo = workOrderRepository.save(wo);
 
-        // Final work order code
         wo.setCode("WO-" + String.format("%05d", wo.getId()));
 
         return workOrderRepository.save(wo);

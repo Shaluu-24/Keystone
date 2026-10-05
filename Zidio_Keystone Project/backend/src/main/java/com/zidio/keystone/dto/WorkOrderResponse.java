@@ -1,3 +1,4 @@
+
 package com.zidio.keystone.dto;
 
 import com.zidio.keystone.domain.*;
@@ -6,37 +7,61 @@ import java.time.Instant;
 import java.util.List;
 
 public record WorkOrderResponse(
+
         Long id,
+
         String code,
+
         String title,
+
         String description,
+
         Priority priority,
+
         WorkOrderStatus status,
+
         Instant slaDueAt,
+
+        Long serviceRequestId,
+
         Long customerId,
+
         String customerName,
+
         Long siteId,
+
         String siteName,
+
         Long assignedToId,
+
         String assignedToName,
+
         Instant createdAt,
+
         Instant updatedAt,
+
         List<HistoryEntry> statusHistory
+
 ) {
 
     public record HistoryEntry(
+
             WorkOrderStatus fromStatus,
+
             WorkOrderStatus toStatus,
+
             String changedBy,
+
             Instant changedAt,
+
             String note
+
     ) {
     }
 
     public static WorkOrderResponse from(WorkOrder w) {
 
-        // Lazy loading issue fix
-        // statusHistory avoid pannrom
+        // Keep history empty to avoid lazy-loading issues.
         List<HistoryEntry> history = List.of();
 
         return new WorkOrderResponse(
@@ -55,6 +80,7 @@ public record WorkOrderResponse(
 
                 w.getSlaDueAt(),
 
+                w.getServiceRequestId(),
 
                 w.getCustomer() != null
                         ? w.getCustomer().getId()
@@ -64,7 +90,6 @@ public record WorkOrderResponse(
                         ? w.getCustomer().getName()
                         : null,
 
-
                 w.getSite() != null
                         ? w.getSite().getId()
                         : null,
@@ -73,7 +98,6 @@ public record WorkOrderResponse(
                         ? w.getSite().getName()
                         : null,
 
-
                 w.getAssignedTo() != null
                         ? w.getAssignedTo().getId()
                         : null,
@@ -81,7 +105,6 @@ public record WorkOrderResponse(
                 w.getAssignedTo() != null
                         ? w.getAssignedTo().getName()
                         : null,
-
 
                 w.getCreatedAt(),
 

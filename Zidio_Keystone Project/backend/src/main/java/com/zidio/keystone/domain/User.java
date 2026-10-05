@@ -1,6 +1,8 @@
+
 package com.zidio.keystone.domain;
 
 import jakarta.persistence.*;
+
 import lombok.*;
 
 import java.time.Instant;
@@ -32,7 +34,7 @@ public class User {
     private Role role;
 
     // For CUSTOMER role users: which customer organisation they belong to.
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id")
     private Customer customer;
 

@@ -1,3 +1,4 @@
+
 package com.zidio.keystone.controller;
 
 import com.zidio.keystone.domain.Role;
@@ -8,10 +9,13 @@ import com.zidio.keystone.dto.RegisterRequest;
 import com.zidio.keystone.dto.RegisterResponse;
 import com.zidio.keystone.repository.UserRepository;
 import com.zidio.keystone.security.JwtService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +42,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -91,5 +96,79 @@ public class AuthController {
                 user.getEmail(),
                 user.getName()
         );
+    }
+
+    /**
+     * Change password for the currently authenticated user.
+     *
+     * The current password is verified before the new BCrypt
+     * password hash is stored in the database.
+     */
+    @PostMapping("/change-password")
+    public PasswordChangeResponse changePassword(
+            @RequestBody PasswordChangeRequest request,
+            Authentication authentication) {
+
+        if (request.currentPassword() == null
+                || request.currentPassword().isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Current password is required"
+            );
+        }
+
+        if (request.newPassword() == null
+                || request.newPassword().isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "New password is required"
+            );
+        }
+
+        if (request.newPassword().length() < 8) {
+            throw new IllegalArgumentException(
+                    "New password must contain at least 8 characters"
+            );
+        }
+
+        if (request.currentPassword().equals(request.newPassword())) {
+            throw new IllegalArgumentException(
+                    "New password must be different from the current password"
+            );
+        }
+
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        if (!passwordEncoder.matches(
+                request.currentPassword(),
+                user.getPasswordHash())) {
+
+            throw new BadCredentialsException(
+                    "Current password is incorrect"
+            );
+        }
+
+        user.setPasswordHash(
+                passwordEncoder.encode(request.newPassword())
+        );
+
+        userRepository.save(user);
+
+        return new PasswordChangeResponse(
+                "Password updated successfully"
+        );
+    }
+
+    public record PasswordChangeRequest(
+            String currentPassword,
+            String newPassword
+    ) {
+    }
+
+    public record PasswordChangeResponse(
+            String message
+    ) {
     }
 }

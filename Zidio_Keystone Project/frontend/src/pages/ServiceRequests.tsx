@@ -4,11 +4,39 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { api, WorkOrder } from "../api/client";
 
+type ServiceRequest = {
+  id: number;
+  serviceType: string;
+  description: string;
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  status: string;
+  photoUrl?: string | null;
+  customer?: {
+    id?: number;
+    name?: string;
+  };
+  site?: {
+    id?: number;
+    name?: string;
+    address?: string;
+  };
+};
+
+type ServiceRequestPage = {
+  content: ServiceRequest[];
+  totalElements: number;
+};
+
+type WorkOrderWithServiceRequest = WorkOrder & {
+  serviceRequestId?: number | null;
+};
+
 export default function ServiceRequests() {
   const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  const [requests, setRequests] = useState<WorkOrder[]>([]);
+  const [requests, setRequests] = useState<WorkOrderWithServiceRequest[]>([]);
+  const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -20,7 +48,6 @@ export default function ServiceRequests() {
   const [priority, setPriority] = useState<
     "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
   >("MEDIUM");
-
   const [customerId, setCustomerId] = useState("");
   const [siteId, setSiteId] = useState("");
   const [slaDueAt, setSlaDueAt] = useState("");
@@ -30,26 +57,32 @@ export default function ServiceRequests() {
       setLoading(true);
       setError("");
 
-      const response = await api.get(
-        "/work-orders?page=0&size=100"
-      );
+      const [workOrderResponse, serviceRequestResponse] =
+        await Promise.all([
+          api.get("/work-orders?page=0&size=100"),
+          api.get<ServiceRequestPage | ServiceRequest[]>(
+            "/service-requests?page=0&size=100"
+          ),
+        ]);
 
-      const data = response.data;
+      const workOrderData = workOrderResponse.data;
 
       setRequests(
-        Array.isArray(data)
-          ? data
-          : data.content ?? []
-      );
-    } catch (err) {
-      console.error(
-        "Service requests loading error:",
-        err
+        Array.isArray(workOrderData)
+          ? workOrderData
+          : workOrderData.content ?? []
       );
 
-      setError(
-        "Unable to load service requests."
+      const serviceRequestData = serviceRequestResponse.data;
+
+      setServiceRequests(
+        Array.isArray(serviceRequestData)
+          ? serviceRequestData
+          : serviceRequestData.content ?? []
       );
+    } catch (err) {
+      console.error("Service requests loading error:", err);
+      setError("Unable to load service requests.");
     } finally {
       setLoading(false);
     }
@@ -59,9 +92,7 @@ export default function ServiceRequests() {
     loadRequests();
   }, []);
 
-  async function createWorkOrder(
-    event: React.FormEvent
-  ) {
+  async function createWorkOrder(event: React.FormEvent) {
     event.preventDefault();
 
     if (!title.trim()) {
@@ -91,7 +122,7 @@ export default function ServiceRequests() {
         siteId: Number(siteId),
         slaDueAt: slaDueAt
           ? new Date(slaDueAt).toISOString()
-          : null
+          : null,
       });
 
       setTitle("");
@@ -100,19 +131,13 @@ export default function ServiceRequests() {
       setCustomerId("");
       setSiteId("");
       setSlaDueAt("");
-
       setShowForm(false);
 
       await loadRequests();
 
-      alert(
-        "Work order created successfully."
-      );
+      alert("Work order created successfully.");
     } catch (err: any) {
-      console.error(
-        "Work order creation error:",
-        err
-      );
+      console.error("Work order creation error:", err);
 
       const message =
         err?.response?.data?.message ||
@@ -168,6 +193,48 @@ export default function ServiceRequests() {
     return status.replace(/_/g, " ");
   }
 
+  /*
+   * Stable matching only.
+   *
+   * WorkOrder.serviceRequestId comes from the backend.
+   * ServiceRequest.id is the original customer request ID.
+   *
+   * No customer/site/title/description fuzzy matching is used.
+   */
+  function findServiceRequest(
+    workOrder: WorkOrderWithServiceRequest
+  ) {
+    if (!workOrder.serviceRequestId) {
+      return undefined;
+    }
+
+    return serviceRequests.find(
+      (request) => request.id === workOrder.serviceRequestId
+    );
+  }
+
+  function getImageUrl(photoUrl?: string | null) {
+    if (!photoUrl) {
+      return "";
+    }
+
+    if (
+      photoUrl.startsWith("http://") ||
+      photoUrl.startsWith("https://")
+    ) {
+      return photoUrl;
+    }
+
+    const baseURL =
+      api.defaults.baseURL || "http://localhost:8080/api";
+
+    const backendBaseURL = baseURL.replace(/\/api\/?$/, "");
+
+    return `${backendBaseURL}${
+      photoUrl.startsWith("/") ? "" : "/"
+    }${photoUrl}`;
+  }
+
   const inputStyle = {
     width: "100%",
     boxSizing: "border-box" as const,
@@ -177,79 +244,61 @@ export default function ServiceRequests() {
     border: darkMode
       ? "1px solid #334155"
       : "1px solid #cbd5e1",
-    background: darkMode
-      ? "#020617"
-      : "white",
-    color: darkMode
-      ? "white"
-      : "#1e293b"
+    background: darkMode ? "#020617" : "white",
+    color: darkMode ? "white" : "#1e293b",
   };
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: darkMode
-          ? "#020617"
-          : "#f8fafc",
-        color: darkMode
-          ? "white"
-          : "#1e293b",
+        background: darkMode ? "#020617" : "#f8fafc",
+        color: darkMode ? "white" : "#1e293b",
         padding: "40px",
-        fontFamily: "Arial, sans-serif"
+        fontFamily: "Arial, sans-serif",
       }}
     >
       {/* HEADER */}
-
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "30px"
+          marginBottom: "30px",
         }}
       >
         <div>
           <h1
             style={{
               color: "#2563eb",
-              margin: 0
+              margin: 0,
             }}
           >
             KEYSTONE
           </h1>
 
-          <h2
-            style={{
-              marginBottom: "5px"
-            }}
-          >
+          <h2 style={{ marginBottom: "5px" }}>
             Service Requests
           </h2>
 
           <p
             style={{
-              color: darkMode
-                ? "#94a3b8"
-                : "#64748b",
-              marginTop: 0
+              color: darkMode ? "#94a3b8" : "#64748b",
+              marginTop: 0,
             }}
           >
-            Manage customer service requests
-            and work order status
+            Manage customer service requests and work order status
           </p>
         </div>
 
         <div
           style={{
             display: "flex",
-            gap: "10px"
+            gap: "10px",
           }}
         >
           <button
-            onClick={() =>
-              setShowForm(!showForm)
-            }
+            onClick={() => setShowForm(!showForm)}
             style={{
               background: "#2563eb",
               color: "white",
@@ -257,27 +306,21 @@ export default function ServiceRequests() {
               padding: "12px 20px",
               borderRadius: "10px",
               cursor: "pointer",
-              fontWeight: 600
+              fontWeight: 600,
             }}
           >
-            {showForm
-              ? "✕ Close"
-              : "+ New Service Request"}
+            {showForm ? "✕ Close" : "+ New Service Request"}
           </button>
 
           <button
             onClick={loadRequests}
             style={{
-              background: darkMode
-                ? "#1e293b"
-                : "#e2e8f0",
-              color: darkMode
-                ? "white"
-                : "#1e293b",
+              background: darkMode ? "#1e293b" : "#e2e8f0",
+              color: darkMode ? "white" : "#1e293b",
               border: "none",
               padding: "12px 20px",
               borderRadius: "10px",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             ↻ Refresh
@@ -286,16 +329,12 @@ export default function ServiceRequests() {
           <button
             onClick={() => navigate("/")}
             style={{
-              background: darkMode
-                ? "#1e293b"
-                : "#e2e8f0",
-              color: darkMode
-                ? "white"
-                : "#1e293b",
+              background: darkMode ? "#1e293b" : "#e2e8f0",
+              color: darkMode ? "white" : "#1e293b",
               border: "none",
               padding: "12px 20px",
               borderRadius: "10px",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             ← Back Dashboard
@@ -304,25 +343,21 @@ export default function ServiceRequests() {
       </div>
 
       {/* CREATE FORM */}
-
       {showForm && (
         <form
           onSubmit={createWorkOrder}
           style={{
-            background: darkMode
-              ? "#111827"
-              : "white",
+            background: darkMode ? "#111827" : "white",
             padding: "30px",
             borderRadius: "18px",
             marginBottom: "30px",
-            boxShadow:
-              "0 8px 25px rgba(0,0,0,0.12)"
+            boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
           }}
         >
           <h2
             style={{
               marginTop: 0,
-              color: "#2563eb"
+              color: "#2563eb",
             }}
           >
             Create New Work Order
@@ -331,18 +366,16 @@ export default function ServiceRequests() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns:
-                "repeat(2, minmax(0, 1fr))",
-              gap: "20px"
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: "20px",
             }}
           >
             <label>
               Service / Title
+
               <input
                 value={title}
-                onChange={(e) =>
-                  setTitle(e.target.value)
-                }
+                onChange={(e) => setTitle(e.target.value)}
                 placeholder="SA Installation"
                 style={inputStyle}
               />
@@ -350,6 +383,7 @@ export default function ServiceRequests() {
 
             <label>
               Priority
+
               <select
                 value={priority}
                 onChange={(e) =>
@@ -363,31 +397,20 @@ export default function ServiceRequests() {
                 }
                 style={inputStyle}
               >
-                <option value="LOW">
-                  LOW
-                </option>
-                <option value="MEDIUM">
-                  MEDIUM
-                </option>
-                <option value="HIGH">
-                  HIGH
-                </option>
-                <option value="CRITICAL">
-                  CRITICAL
-                </option>
+                <option value="LOW">LOW</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="HIGH">HIGH</option>
+                <option value="CRITICAL">CRITICAL</option>
               </select>
             </label>
 
             <label>
               Customer ID
+
               <input
                 type="number"
                 value={customerId}
-                onChange={(e) =>
-                  setCustomerId(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setCustomerId(e.target.value)}
                 placeholder="1"
                 style={inputStyle}
               />
@@ -395,12 +418,11 @@ export default function ServiceRequests() {
 
             <label>
               Site ID
+
               <input
                 type="number"
                 value={siteId}
-                onChange={(e) =>
-                  setSiteId(e.target.value)
-                }
+                onChange={(e) => setSiteId(e.target.value)}
                 placeholder="1"
                 style={inputStyle}
               />
@@ -408,14 +430,11 @@ export default function ServiceRequests() {
 
             <label>
               SLA Due Date & Time
+
               <input
                 type="datetime-local"
                 value={slaDueAt}
-                onChange={(e) =>
-                  setSlaDueAt(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setSlaDueAt(e.target.value)}
                 style={inputStyle}
               />
             </label>
@@ -424,23 +443,19 @@ export default function ServiceRequests() {
           <label
             style={{
               display: "block",
-              marginTop: "20px"
+              marginTop: "20px",
             }}
           >
             Description / Customer Issue
 
             <textarea
               value={description}
-              onChange={(e) =>
-                setDescription(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the customer problem..."
               rows={4}
               style={{
                 ...inputStyle,
-                resize: "vertical"
+                resize: "vertical",
               }}
             />
           </label>
@@ -449,7 +464,7 @@ export default function ServiceRequests() {
             style={{
               display: "flex",
               gap: "10px",
-              marginTop: "20px"
+              marginTop: "20px",
             }}
           >
             <button
@@ -461,33 +476,23 @@ export default function ServiceRequests() {
                 border: "none",
                 padding: "13px 25px",
                 borderRadius: "10px",
-                cursor: creating
-                  ? "not-allowed"
-                  : "pointer",
-                fontWeight: 600
+                cursor: creating ? "not-allowed" : "pointer",
+                fontWeight: 600,
               }}
             >
-              {creating
-                ? "Creating..."
-                : "Create Work Order"}
+              {creating ? "Creating..." : "Create Work Order"}
             </button>
 
             <button
               type="button"
-              onClick={() =>
-                setShowForm(false)
-              }
+              onClick={() => setShowForm(false)}
               style={{
-                background: darkMode
-                  ? "#334155"
-                  : "#e2e8f0",
-                color: darkMode
-                  ? "white"
-                  : "#1e293b",
+                background: darkMode ? "#334155" : "#e2e8f0",
+                color: darkMode ? "white" : "#1e293b",
                 border: "none",
                 padding: "13px 25px",
                 borderRadius: "10px",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               Cancel
@@ -497,19 +502,14 @@ export default function ServiceRequests() {
       )}
 
       {/* ERROR */}
-
       {error && (
         <div
           style={{
-            background: darkMode
-              ? "#3f1d1d"
-              : "#fee2e2",
-            color: darkMode
-              ? "#fecaca"
-              : "#991b1b",
+            background: darkMode ? "#3f1d1d" : "#fee2e2",
+            color: darkMode ? "#fecaca" : "#991b1b",
             padding: "15px",
             borderRadius: "12px",
-            marginBottom: "20px"
+            marginBottom: "20px",
           }}
         >
           {error}
@@ -517,16 +517,13 @@ export default function ServiceRequests() {
       )}
 
       {/* LOADING */}
-
       {loading && (
         <div
           style={{
-            background: darkMode
-              ? "#111827"
-              : "white",
+            background: darkMode ? "#111827" : "white",
             padding: "30px",
             borderRadius: "16px",
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           Loading service requests...
@@ -534,220 +531,227 @@ export default function ServiceRequests() {
       )}
 
       {/* EMPTY */}
+      {!loading && !error && requests.length === 0 && (
+        <div
+          style={{
+            background: darkMode ? "#111827" : "white",
+            padding: "50px 30px",
+            borderRadius: "18px",
+            textAlign: "center",
+          }}
+        >
+          <h2>No service requests found</h2>
 
-      {!loading &&
-        !error &&
-        requests.length === 0 && (
-          <div
+          <p
             style={{
-              background: darkMode
-                ? "#111827"
-                : "white",
-              padding: "50px 30px",
-              borderRadius: "18px",
-              textAlign: "center"
+              color: darkMode ? "#94a3b8" : "#64748b",
             }}
           >
-            <h2>No service requests found</h2>
+            There are currently no work orders in the backend database.
+          </p>
 
-            <p
-              style={{
-                color: darkMode
-                  ? "#94a3b8"
-                  : "#64748b"
-              }}
-            >
-              There are currently no work
-              orders in the backend database.
-            </p>
-
-            <button
-              onClick={() =>
-                setShowForm(true)
-              }
-              style={{
-                marginTop: "15px",
-                background: "#2563eb",
-                color: "white",
-                border: "none",
-                padding: "12px 22px",
-                borderRadius: "10px",
-                cursor: "pointer"
-              }}
-            >
-              + Create First Work Order
-            </button>
-          </div>
-        )}
+          <button
+            onClick={() => setShowForm(true)}
+            style={{
+              marginTop: "15px",
+              background: "#2563eb",
+              color: "white",
+              border: "none",
+              padding: "12px 22px",
+              borderRadius: "10px",
+              cursor: "pointer",
+            }}
+          >
+            + Create First Work Order
+          </button>
+        </div>
+      )}
 
       {/* WORK ORDERS */}
-
       {!loading &&
-        requests.map((req) => (
-          <div
-            key={req.id}
-            style={{
-              background: darkMode
-                ? "#111827"
-                : "white",
-              padding: "25px",
-              marginTop: "20px",
-              borderRadius: "18px",
-              boxShadow:
-                "0 8px 20px rgba(0,0,0,0.10)",
-              borderLeft:
-                "5px solid #2563eb"
-            }}
-          >
+        requests.map((req) => {
+          const matchingRequest = findServiceRequest(req);
+          const imageUrl = getImageUrl(matchingRequest?.photoUrl);
+
+          return (
             <div
+              key={req.id}
               style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems: "center"
+                background: darkMode ? "#111827" : "white",
+                padding: "25px",
+                marginTop: "20px",
+                borderRadius: "18px",
+                boxShadow: "0 8px 20px rgba(0,0,0,0.10)",
+                borderLeft: "5px solid #2563eb",
               }}
             >
-              <h2 style={{ margin: 0 }}>
-                {req.code}
-              </h2>
-
-              <span
+              <div
                 style={{
-                  color: getStatusColor(
-                    req.status
-                  ),
-                  fontWeight: 700
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
-                {formatStatus(req.status)}
-              </span>
-            </div>
+                <h2 style={{ margin: 0 }}>{req.code}</h2>
 
-            <h3>
-              {req.title}
-            </h3>
-
-            <p>
-              <b>Customer:</b>{" "}
-              {req.customerName}
-            </p>
-
-            <p>
-              <b>Location:</b>{" "}
-              {req.siteName}
-            </p>
-
-            {req.description && (
-              <p>
-                <b>Issue:</b>{" "}
-                {req.description}
-              </p>
-            )}
-
-            <p>
-              <b>Priority:</b>{" "}
-              <span
-                style={{
-                  color:
-                    getPriorityColor(
-                      req.priority
-                    ),
-                  fontWeight: 700
-                }}
-              >
-                {req.priority}
-              </span>
-            </p>
-
-            <p>
-              <b>Technician:</b>{" "}
-              {req.assignedToName ||
-                "Not assigned"}
-            </p>
-
-            {req.slaDueAt && (
-              <p>
-                <b>SLA Due:</b>{" "}
-                {new Date(
-                  req.slaDueAt
-                ).toLocaleString()}
-              </p>
-            )}
-
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                marginTop: "20px"
-              }}
-            >
-              <button
-                onClick={() =>
-                  navigate(
-                    `/work-orders/${req.id}`
-                  )
-                }
-                style={{
-                  background: darkMode
-                    ? "#1e293b"
-                    : "#e2e8f0",
-                  color: darkMode
-                    ? "white"
-                    : "#1e293b",
-                  border: "none",
-                  padding: "12px 20px",
-                  borderRadius: "10px",
-                  cursor: "pointer"
-                }}
-              >
-                View Details
-              </button>
-
-              {req.status === "NEW" && (
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/work-orders/${req.id}/assign`
-                    )
-                  }
+                <span
                   style={{
-                    background: "#2563eb",
-                    color: "white",
-                    border: "none",
-                    padding:
-                      "12px 25px",
-                    borderRadius: "10px",
-                    cursor: "pointer"
+                    color: getStatusColor(req.status),
+                    fontWeight: 700,
                   }}
                 >
-                  Assign Technician
-                </button>
+                  {formatStatus(req.status)}
+                </span>
+              </div>
+
+              <h3>{req.title}</h3>
+
+              <p>
+                <b>Customer:</b> {req.customerName}
+              </p>
+
+              <p>
+                <b>Location:</b> {req.siteName}
+              </p>
+
+              {req.description && (
+                <p>
+                  <b>Issue:</b> {req.description}
+                </p>
               )}
 
-              {req.status === "ASSIGNED" && (
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/work-orders/${req.id}/assign`
-                    )
-                  }
+              <p>
+                <b>Priority:</b>{" "}
+                <span
                   style={{
-                    background: "#7c3aed",
-                    color: "white",
-                    border: "none",
-                    padding:
-                      "12px 25px",
-                    borderRadius: "10px",
-                    cursor: "pointer"
+                    color: getPriorityColor(req.priority),
+                    fontWeight: 700,
                   }}
                 >
-                  Reassign Technician
-                </button>
+                  {req.priority}
+                </span>
+              </p>
+
+              <p>
+                <b>Technician:</b>{" "}
+                {req.assignedToName || "Not assigned"}
+              </p>
+
+              {req.slaDueAt && (
+                <p>
+                  <b>SLA Due:</b>{" "}
+                  {new Date(req.slaDueAt).toLocaleString()}
+                </p>
               )}
+
+              {/* CUSTOMER UPLOADED IMAGE */}
+              {imageUrl && (
+                <div
+                  style={{
+                    marginTop: "22px",
+                    paddingTop: "20px",
+                    borderTop: darkMode
+                      ? "1px solid #334155"
+                      : "1px solid #e2e8f0",
+                  }}
+                >
+                  <h3
+                    style={{
+                      marginTop: 0,
+                      color: "#2563eb",
+                    }}
+                  >
+                    Issue Photo
+                  </h3>
+
+                  <img
+                    src={imageUrl}
+                    alt="Customer uploaded issue"
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      maxWidth: "500px",
+                      maxHeight: "360px",
+                      objectFit: "contain",
+                      borderRadius: "12px",
+                      border: darkMode
+                        ? "1px solid #334155"
+                        : "1px solid #cbd5e1",
+                      background: darkMode
+                        ? "#020617"
+                        : "#f8fafc",
+                    }}
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  marginTop: "20px",
+                }}
+              >
+                <button
+                  onClick={() =>
+                    navigate(`/work-orders/${req.id}`)
+                  }
+                  style={{
+                    background: darkMode
+                      ? "#1e293b"
+                      : "#e2e8f0",
+                    color: darkMode ? "white" : "#1e293b",
+                    border: "none",
+                    padding: "12px 20px",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                  }}
+                >
+                  View Details
+                </button>
+
+                {req.status === "NEW" && (
+                  <button
+                    onClick={() =>
+                      navigate(`/work-orders/${req.id}/assign`)
+                    }
+                    style={{
+                      background: "#2563eb",
+                      color: "white",
+                      border: "none",
+                      padding: "12px 25px",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Assign Technician
+                  </button>
+                )}
+
+                {req.status === "ASSIGNED" && (
+                  <button
+                    onClick={() =>
+                      navigate(`/work-orders/${req.id}/assign`)
+                    }
+                    style={{
+                      background: "#7c3aed",
+                      color: "white",
+                      border: "none",
+                      padding: "12px 25px",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Reassign Technician
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
     </div>
   );
 }
-

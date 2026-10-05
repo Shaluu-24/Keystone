@@ -1,52 +1,55 @@
 
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
-import axios from "axios";
+import { api } from "../api/client";
+
+type Technician = {
+  id: number;
+  name: string;
+  email: string;
+};
 
 export default function AssignTechnician() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { darkMode } = useTheme();
 
-  const [technician, setTechnician] = useState("");
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [technicianId, setTechnicianId] = useState("");
   const [assigned, setAssigned] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingTechnicians, setLoadingTechnicians] = useState(true);
   const [error, setError] = useState("");
 
-  const technicians = [
-    {
-      id: 1,
-      name: "Arun Kumar",
-      skill: "AC Repair",
-      jobs: 12,
-      availability: "Available",
-    },
-    {
-      id: 2,
-      name: "Rahul Sharma",
-      skill: "Electrical Inspection",
-      jobs: 9,
-      availability: "Available",
-    },
-    {
-      id: 3,
-      name: "Vijay Kumar",
-      skill: "Cooling System",
-      jobs: 7,
-      availability: "Busy",
-    },
-    {
-      id: 4,
-      name: "Suresh Raj",
-      skill: "Maintenance",
-      jobs: 5,
-      availability: "Available",
-    },
-  ];
+  useEffect(() => {
+    loadTechnicians();
+  }, []);
+
+  const loadTechnicians = async () => {
+    try {
+      setLoadingTechnicians(true);
+      setError("");
+
+      const response = await api.get<Technician[]>("/users/technicians");
+
+      setTechnicians(response.data);
+    } catch (err: any) {
+      console.error("Technician loading error:", err);
+
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Unable to load technicians.";
+
+      setError(message);
+    } finally {
+      setLoadingTechnicians(false);
+    }
+  };
 
   const selectedTech = technicians.find(
-    (item) => item.name === technician
+    (tech) => String(tech.id) === technicianId
   );
 
   const handleAssign = async () => {
@@ -59,20 +62,10 @@ export default function AssignTechnician() {
       setError("");
       setAssigned(false);
 
-      const token = localStorage.getItem("keystone_token");
-
-      await axios.post(
-        `http://localhost:8080/api/work-orders/${id}/assign`,
-        {
-          technicianId: selectedTech.id,
-        },
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await api.post(`/work-orders/${id}/assign`, {
+        technicianId: selectedTech.id,
+        note: "Technician assigned by manager.",
+      });
 
       setAssigned(true);
     } catch (err: any) {
@@ -99,7 +92,6 @@ export default function AssignTechnician() {
         fontFamily: "Arial, sans-serif",
       }}
     >
-      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -107,13 +99,7 @@ export default function AssignTechnician() {
           alignItems: "center",
         }}
       >
-        <h1
-          style={{
-            color: "#2563eb",
-          }}
-        >
-          KEYSTONE
-        </h1>
+        <h1 style={{ color: "#2563eb" }}>KEYSTONE</h1>
 
         <button
           onClick={() => navigate("/")}
@@ -130,7 +116,6 @@ export default function AssignTechnician() {
         </button>
       </div>
 
-      {/* Main Card */}
       <div
         style={{
           background: darkMode ? "#111827" : "white",
@@ -143,11 +128,7 @@ export default function AssignTechnician() {
       >
         <h2>Assign Technician</h2>
 
-        <h3
-          style={{
-            color: "#3b82f6",
-          }}
-        >
+        <h3 style={{ color: "#3b82f6" }}>
           Work Order : {id}
         </h3>
 
@@ -155,14 +136,14 @@ export default function AssignTechnician() {
           Select suitable technician for this service request
         </p>
 
-        {/* Technician Dropdown */}
         <select
-          value={technician}
+          value={technicianId}
           onChange={(e) => {
-            setTechnician(e.target.value);
+            setTechnicianId(e.target.value);
             setAssigned(false);
             setError("");
           }}
+          disabled={loadingTechnicians}
           style={{
             width: "100%",
             padding: "14px",
@@ -171,16 +152,21 @@ export default function AssignTechnician() {
             marginTop: "20px",
           }}
         >
-          <option value="">Select Technician</option>
+          <option value="">
+            {loadingTechnicians
+              ? "Loading Technicians..."
+              : technicians.length === 0
+                ? "No technicians available"
+                : "Select Technician"}
+          </option>
 
           {technicians.map((tech) => (
-            <option key={tech.id} value={tech.name}>
-              {tech.name}
+            <option key={tech.id} value={tech.id}>
+              {tech.name} — {tech.email}
             </option>
           ))}
         </select>
 
-        {/* Technician Details */}
         {selectedTech && (
           <div
             style={{
@@ -197,30 +183,15 @@ export default function AssignTechnician() {
             </p>
 
             <p>
-              Skill : <b>{selectedTech.skill}</b>
+              Email : <b>{selectedTech.email}</b>
             </p>
 
             <p>
-              Current Jobs : <b>{selectedTech.jobs}</b>
-            </p>
-
-            <p>
-              Availability :{" "}
-              <b
-                style={{
-                  color:
-                    selectedTech.availability === "Available"
-                      ? "#22c55e"
-                      : "#ef4444",
-                }}
-              >
-                {selectedTech.availability}
-              </b>
+              Role : <b>TECHNICIAN</b>
             </p>
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div
             style={{
@@ -235,9 +206,8 @@ export default function AssignTechnician() {
           </div>
         )}
 
-        {/* Assign Button */}
         <button
-          disabled={!technician || loading}
+          disabled={!selectedTech || loading || loadingTechnicians}
           onClick={handleAssign}
           style={{
             marginTop: "30px",
@@ -247,16 +217,14 @@ export default function AssignTechnician() {
             padding: "14px 30px",
             borderRadius: "10px",
             cursor:
-              technician && !loading
-                ? "pointer"
-                : "not-allowed",
-            opacity: technician && !loading ? 1 : 0.5,
+              selectedTech && !loading ? "pointer" : "not-allowed",
+            opacity:
+              selectedTech && !loading ? 1 : 0.5,
           }}
         >
           {loading ? "Assigning..." : "Assign Technician"}
         </button>
 
-        {/* Success */}
         {assigned && selectedTech && (
           <div
             style={{
@@ -271,21 +239,30 @@ export default function AssignTechnician() {
 
             <p>
               Technician <b>{selectedTech.name}</b> assigned to{" "}
-              <b>{id}</b>
+              <b>WO-{String(id).padStart(5, "0")}</b>
             </p>
 
             <p>
               Status : <b>ASSIGNED</b>
             </p>
 
-            <p>
-              Assigned Date :{" "}
-              <b>{new Date().toLocaleString()}</b>
-            </p>
+            <button
+              onClick={() => navigate(`/work-orders/${id}`)}
+              style={{
+                marginTop: "10px",
+                background: "#2563eb",
+                color: "white",
+                border: "none",
+                padding: "10px 18px",
+                borderRadius: "8px",
+                cursor: "pointer",
+              }}
+            >
+              View Work Order
+            </button>
           </div>
         )}
       </div>
     </div>
   );
 }
-
